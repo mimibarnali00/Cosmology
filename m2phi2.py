@@ -143,7 +143,7 @@ def perturbeq(N,G,k,H,eps1,eps2):
 	a = np.exp(N)
 	Gk, GkN = G
 	GkNN = - (3-eps1+eps2)*GkN - (k/(a*H))**2*Gk
-	return Gk,GkN
+	return GkN,GkNN
 
 #finding ai (Kp exits H at Ne=50)
 kp = 0.05 #Mpc^-1

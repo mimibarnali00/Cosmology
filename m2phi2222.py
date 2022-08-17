@@ -214,9 +214,9 @@ def perturbeq(N,G,k):
 	a = np.exp(N)
 	Gk, GkN = G
 	GkNN = - (3 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - (k/(a*Hinf_cubic(N)))**2*Gk
-	return Gk,GkN
+	return GkN,GkNN
 
-efolds = np.arange(Ni, Ne, 0.001)
+efolds = np.arange(Ni, Ne, 0.0001)
 
 Nrfin = []
 Nifin = []
