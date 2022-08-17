@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
+from scipy.interpolate import interp1d
 
 def potential(phi,potparams):
 	mass = potparams
@@ -154,7 +155,7 @@ for i in N:
 		ex.append(i)
 
 ind1 = np.where(N == ex[-1])[0][0]
-print(ind1,N[ind1])
+#print(ind1,N[ind1])
 ai = kp/(np.exp(N[ind1])*Hinf[ind1]) #Mpc^-1/Mpl
 print("ai = ",ai)
 
@@ -187,49 +188,105 @@ print("Ne = ",Ne)
 #############
 eta = 1/(anew*Hinf)
 
-vk = np.exp(-i*kp*eta)/(np.sqrt(2*kp))
-dvk = (-i*kp)*np.exp(-i*kp*eta)/(np.sqrt(2*kp))
+vkr = np.cos(kp*eta)/(np.sqrt(2*kp))
+dvkr = (-kp)*np.sin(kp*eta)/(np.sqrt(2*kp))
+vki = -np.sin(kp*eta)/(np.sqrt(2*kp))
+dvki = (-kp)*np.cos(kp*eta)/(np.sqrt(2*kp))
 
 z = anew*np.sqrt(2*epsilon1)
 dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
 
-Gk = vk/z
-dGk = dvk/z - vk*dz/(z**2)
+Gkr = vkr/z
+dGkr = dvkr/z - vkr*dz/(z**2)
+Gki = vki/z
+dGki = dvki/z - vki*dz/(z**2)
 
 #initial conditions
-ain = anew[k_aHinind]
-etain = eta[k_aHinind]
-
-vkin = vk[k_aHinind]
-dvkin = dvk[k_aHinind]
-
-zin = z[k_aHinind]
-dzin = dz[k_aHinind]
-
-Gkin = Gk[k_aHinind]
-dGkin = dGk[k_aHinind]
+Gkrin = Gkr[k_aHinind]
+dGkrin = dGkr[k_aHinind]
+Gkiin = Gki[k_aHinind]
+dGkiin = dGki[k_aHinind]
 #print(ain,etain,vkin,dvkin,zin,dzin,Gkin,dGkin)
 
-N = np.linspace(Ni, Ne, np.size(Hinf))
+##Interpolating Hinf, epsilon1, epsilon2
+Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
+epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
+epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
 
-Nfin = []
-G = []
-dG = []
-for i in range(np.size(N)-1):
-	Gsol = solve_ivp(perturbeq,[N[i],N[i+1]],[Gk[i],dGk[i]],args = (kp,Hinf[i],epsilon1[i],epsilon2[i]),dense_output=True) #default RK45
-	Nfin.append(Gsol.t[0])
-	G.append(Gsol.y[0][0])
-	dG.append(Gsol.y[1][0])
-	
-print(np.size(Nfin),np.size(G),np.size(dG))
-plt.plot(Nfin,G)
-plt.yscale('log')
-plt.xlabel('N')
-plt.ylabel('$\zeta_{k}$')
-plt.show()
+efolds = np.arange(Ni, Ne, 0.01)
+#plt.scatter(N, Hinf_cubic(N))
+#plt.scatter(N, epsilon1_cubic(N))
+#plt.scatter(N, epsilon2_cubic(N))
+#plt.plot(efolds, Hinf_cubic(efolds), label='cubic')
+#plt.plot(efolds, epsilon1_cubic(efolds), label='cubic')
+#plt.plot(efolds, epsilon2_cubic(efolds), label='cubic')
+#plt.show()
 
-plt.plot(Nfin,dG)
-#plt.yscale('log')
-plt.xlabel('N')
-plt.ylabel('$\zeta\'_{k}$')
+Nrfin = []
+Nifin = []
+Gr = []
+dGr = []
+Gi = []
+dGi = []
+#for i in range(np.size(efolds)-1):
+#	Grsol = solve_ivp(perturbeq,[efolds[i],efolds[i+1]],[Gkr[i],dGkr[i]],args = (kp,Hinf_cubic(efolds[i]),epsilon1_cubic(efolds[i]),epsilon2_cubic(efolds[i]))) #default RK45
+#	Nrfin.append(Grsol.t[-1])
+#	Gr.append(Grsol.y[0][-1])
+#	dGr.append(Grsol.y[1][-1])
+
+for i in range(np.size(efolds)-1):
+	Grsol = solve_ivp(perturbeq, [efolds[i],efolds[i+1]], [Gkrin,dGkrin], args = (kp,Hinf_cubic(efolds[i]),epsilon1_cubic(efolds[i]),epsilon2_cubic(efolds[i]))) #default RK45
+	Gkrin = Grsol.y[0][-1]
+	dGkrin = Grsol.y[1][-1]
+	Nrfin.append(Grsol.t[-1])
+	Gr.append(Gkrin)
+	dGr.append(dGkrin)
+
+
+#############################################
+#for i in range(np.size(efolds)-1):
+#	Gisol = solve_ivp(perturbeq, [efolds[i],efolds[i+1]], [Gki[i],dGki[i]], args = (kp,Hinf_cubic(efolds[i]),epsilon1_cubic(efolds[i]),epsilon2_cubic(efolds[i]))) #default RK45
+#	Nifin.append(Gisol.t[-1])
+#	Gi.append(Gisol.y[0][-1])
+#	dGi.append(Gisol.y[1][-1])
+
+for i in range(np.size(efolds)-1):
+	Gisol = solve_ivp(perturbeq, [efolds[i],efolds[i+1]], [Gkiin,dGkiin], args = (kp,Hinf_cubic(efolds[i]),epsilon1_cubic(efolds[i]),epsilon2_cubic(efolds[i]))) #default RK45
+	Gkiin = Gisol.y[0][-1]
+	dGkiin = Gisol.y[1][-1]
+	Nifin.append(Gisol.t[-1])
+	Gi.append(Gkiin)
+	dGi.append(dGkiin)
+
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
+ax1.plot(Nrfin,Gr,label = "Real")
+ax1.plot(Nifin,Gi,label = "Imaginary")
+ax1.set_xlabel('N')
+ax1.set_ylabel('$\zeta_{k}$')
+ax1.legend()
+
+ax2.plot(Nrfin,np.abs(Gr),label = "Real")
+ax2.plot(Nifin,np.abs(Gi),label = "Imaginary")
+ax2.set_yscale('log')
+ax2.set_xlabel('N')
+ax2.set_ylabel('$\zeta_{k}$')
+ax2.legend()
+
+ax3.plot(Nrfin,dGr,label = "Real")
+ax3.plot(Nifin,dGi,label = "Imaginary")
+ax3.set_xlabel('N')
+ax3.set_ylabel('$\zeta\'_{k}$')
+ax3.legend()
+
+ax4.plot(Nrfin,np.abs(dGr),label = "Real")
+ax4.plot(Nifin,np.abs(dGi),label = "Imaginary")
+ax4.set_yscale('log')
+ax4.set_xlabel('N')
+ax4.set_ylabel('$\zeta\'_{k}$')
+ax4.legend()
 plt.show()

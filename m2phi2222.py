@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
+from scipy.interpolate import interp1d
 
 def potential(phi,potparams):
 	mass = potparams
@@ -138,13 +139,6 @@ zer = np.zeros(np.size(epsilon2)+1)
 zer[1:] = epsilon2
 epsilon2 = zer
 
-#G = psi + delphi/dphidN
-def perturbeq(N,G,k,H,eps1,eps2):
-	a = np.exp(N)
-	Gk, GkN = G
-	GkNN = - (3-eps1+eps2)*GkN - (k/(a*H))**2*Gk
-	return Gk,GkN
-
 #finding ai (Kp exits H at Ne=50)
 kp = 0.05 #Mpc^-1
 Np = N[infl-1]-50 #=Nend-50
@@ -154,7 +148,7 @@ for i in N:
 		ex.append(i)
 
 ind1 = np.where(N == ex[-1])[0][0]
-print(ind1,N[ind1])
+#print(ind1,N[ind1])
 ai = kp/(np.exp(N[ind1])*Hinf[ind1]) #Mpc^-1/Mpl
 print("ai = ",ai)
 
@@ -187,49 +181,89 @@ print("Ne = ",Ne)
 #############
 eta = 1/(anew*Hinf)
 
-vk = np.exp(-i*kp*eta)/(np.sqrt(2*kp))
-dvk = (-i*kp)*np.exp(-i*kp*eta)/(np.sqrt(2*kp))
+vkr = np.cos(kp*eta)/(np.sqrt(2*kp))
+dvkr = (-kp)*np.sin(kp*eta)/(np.sqrt(2*kp))
+vki = -np.sin(kp*eta)/(np.sqrt(2*kp))
+dvki = (-kp)*np.cos(kp*eta)/(np.sqrt(2*kp))
 
 z = anew*np.sqrt(2*epsilon1)
 dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
 
-Gk = vk/z
-dGk = dvk/z - vk*dz/(z**2)
+Gkr = vkr/z
+dGkr = dvkr/z - vkr*dz/(z**2)
+Gki = vki/z
+dGki = dvki/z - vki*dz/(z**2)
 
 #initial conditions
-ain = anew[k_aHinind]
-etain = eta[k_aHinind]
-
-vkin = vk[k_aHinind]
-dvkin = dvk[k_aHinind]
-
-zin = z[k_aHinind]
-dzin = dz[k_aHinind]
-
-Gkin = Gk[k_aHinind]
-dGkin = dGk[k_aHinind]
+Gkrin = Gkr[k_aHinind]
+dGkrin = dGkr[k_aHinind]
+Gkiin = Gki[k_aHinind]
+dGkiin = dGki[k_aHinind]
 #print(ain,etain,vkin,dvkin,zin,dzin,Gkin,dGkin)
 
-N = np.linspace(Ni, Ne, np.size(Hinf))
+##Interpolating Hinf, epsilon1, epsilon2
+Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
+epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
+epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
 
-Nfin = []
-G = []
-dG = []
-for i in range(np.size(N)-1):
-	Gsol = solve_ivp(perturbeq,[N[i],N[i+1]],[Gk[i],dGk[i]],args = (kp,Hinf[i],epsilon1[i],epsilon2[i]),dense_output=True) #default RK45
-	Nfin.append(Gsol.t[0])
-	G.append(Gsol.y[0][0])
-	dG.append(Gsol.y[1][0])
-	
-print(np.size(Nfin),np.size(G),np.size(dG))
-plt.plot(Nfin,G)
-plt.yscale('log')
-plt.xlabel('N')
-plt.ylabel('$\zeta_{k}$')
-plt.show()
+#G = psi + delphi/dphidN
+def perturbeq(N,G,k):
+	a = np.exp(N)
+	Gk, GkN = G
+	GkNN = - (3 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - (k/(a*Hinf_cubic(N)))**2*Gk
+	return Gk,GkN
 
-plt.plot(Nfin,dG)
-#plt.yscale('log')
-plt.xlabel('N')
-plt.ylabel('$\zeta\'_{k}$')
+efolds = np.arange(Ni, Ne, 0.001)
+
+Nrfin = []
+Nifin = []
+Gr = []
+dGr = []
+Gi = []
+dGi = []
+
+Grsol = solve_ivp(perturbeq,[Ni,Ne],[Gkrin,dGkrin],args = (kp, )) #default RK45
+print(Grsol)
+Nrfin = Grsol.t
+Gr = Grsol.y[0]
+dGr = Grsol.y[1]
+
+#############################################
+Gisol = solve_ivp(perturbeq,[Ni,Ne],[Gkiin,dGkiin],args = (kp, )) #default RK45
+print(Gisol)
+Nifin = Gisol.t
+Gi = Gisol.y[0]
+dGi = Gisol.y[1]
+
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
+ax1.plot(Nrfin,Gr,label = "Real")
+ax1.plot(Nifin,Gi,label = "Imaginary")
+ax1.set_xlabel('N')
+ax1.set_ylabel('$\zeta_{k}$')
+ax1.legend()
+
+ax2.plot(Nrfin,np.abs(Gr),label = "Real")
+ax2.plot(Nifin,np.abs(Gi),label = "Imaginary")
+ax2.set_yscale('log')
+ax2.set_xlabel('N')
+ax2.set_ylabel('$\zeta_{k}$')
+ax2.legend()
+
+ax3.plot(Nrfin,dGr,label = "Real")
+ax3.plot(Nifin,dGi,label = "Imaginary")
+ax3.set_xlabel('N')
+ax3.set_ylabel('$\zeta\'_{k}$')
+ax3.legend()
+
+ax4.plot(Nrfin,np.abs(dGr),label = "Real")
+ax4.plot(Nifin,np.abs(dGi),label = "Imaginary")
+ax4.set_yscale('log')
+ax4.set_xlabel('N')
+ax4.set_ylabel('$\zeta\'_{k}$')
+ax4.legend()
 plt.show()

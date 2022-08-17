@@ -143,7 +143,7 @@ def perturbeq(N,G,k,H,eps1,eps2):
 	a = np.exp(N)
 	Gk, GkN = G
 	GkNN = - (3-eps1+eps2)*GkN - (k/(a*H))**2*Gk
-	return GkN,GkNN
+	return Gk,GkN
 
 #finding ai (Kp exits H at Ne=50)
 kp = 0.05 #Mpc^-1
@@ -239,8 +239,8 @@ ax1.set_xlabel('N')
 ax1.set_ylabel('$\zeta_{k}$')
 ax1.legend()
 
-ax2.plot(Nrfin,Gr,label = "Real")
-ax2.plot(Nifin,Gi,label = "Imaginary")
+ax2.plot(Nrfin,np.abs(Gr),label = "Real")
+ax2.plot(Nifin,np.abs(Gi),label = "Imaginary")
 ax2.set_yscale('log')
 ax2.set_xlabel('N')
 ax2.set_ylabel('$\zeta_{k}$')
@@ -252,8 +252,8 @@ ax3.set_xlabel('N')
 ax3.set_ylabel('$\zeta\'_{k}$')
 ax3.legend()
 
-ax4.plot(Nrfin,dGr,label = "Real")
-ax4.plot(Nifin,dGi,label = "Imaginary")
+ax4.plot(Nrfin,np.abs(dGr),label = "Real")
+ax4.plot(Nifin,np.abs(dGi),label = "Imaginary")
 ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$\zeta\'_{k}$')
