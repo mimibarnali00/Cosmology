@@ -128,12 +128,14 @@ plt.legend()
 plt.show()
 
 ##Perturbation equation
+#epsilon2
 deps2dN = []
 for i in range(np.size(N)-1):
 	ans = ((epsilon1[i+1]-epsilon1[i])/(N[i+1]-N[i]))
 	deps2dN.append(ans)
 
 epsilon2 = np.divide(deps2dN,epsilon1[1:])
+
 #Making size of epsilon1 = size of epsilon2 by adding a 0 as first element
 zer = np.zeros(np.size(epsilon2)+1)
 zer[1:] = epsilon2
@@ -179,7 +181,7 @@ print("k_aHen = ",k_aHen[0])
 print("Ne = ",Ne)
 
 #############
-eta = 1/(anew*Hinf)
+eta = -1/(anew*Hinf)
 
 vkr = np.cos(kp*eta)/(np.sqrt(2*kp))
 dvkr = (-kp)*np.sin(kp*eta)/(np.sqrt(2*kp))
@@ -206,6 +208,7 @@ Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
 epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
 epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
 
+#Perturbation eq in efolds
 #G = psi + delphi/dphidN
 def perturbeq(N,G,k):
 	a = np.exp(N)
@@ -222,14 +225,14 @@ dGr = []
 Gi = []
 dGi = []
 
-Grsol = solve_ivp(perturbeq,[Ni,Ne],[Gkrin,dGkrin],args = (kp, )) #default RK45
+Grsol = solve_ivp(perturbeq,[Ni,Ne],[Gkrin,dGkrin],t_eval=efolds,args = (kp, )) #default RK45
 print(Grsol)
 Nrfin = Grsol.t
 Gr = Grsol.y[0]
 dGr = Grsol.y[1]
 
 #############################################
-Gisol = solve_ivp(perturbeq,[Ni,Ne],[Gkiin,dGkiin],args = (kp, )) #default RK45
+Gisol = solve_ivp(perturbeq,[Ni,Ne],[Gkiin,dGkiin],t_eval=efolds,args = (kp, )) #default RK45
 print(Gisol)
 Nifin = Gisol.t
 Gi = Gisol.y[0]

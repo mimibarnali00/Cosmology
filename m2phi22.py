@@ -185,7 +185,7 @@ print("k_aHen = ",k_aHen[0])
 print("Ne = ",Ne)
 
 #############
-eta = 1/(anew*Hinf)
+eta = -1/(anew*Hinf)
 
 vkr = np.cos(kp*eta)/(np.sqrt(2*kp))
 dvkr = (-kp)*np.sin(kp*eta)/(np.sqrt(2*kp))

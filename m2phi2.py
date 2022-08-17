@@ -185,7 +185,7 @@ print("k_aHen = ",k_aHen[0])
 print("Ne = ",Ne)
 
 #############
-eta = 1/(anew*Hinf)
+eta = -1/(anew*Hinf)
 
 vk = np.exp(-i*kp*eta)/(np.sqrt(2*kp))
 dvk = (-i*kp)*np.exp(-i*kp*eta)/(np.sqrt(2*kp))
