@@ -185,17 +185,29 @@ eta = -1/(anew*Hinf)
 z = anew*np.sqrt(2*epsilon1)
 dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
 
-#initial conditions for scalars
-Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
-dGkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/z - (np.cos(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
-Gkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
-dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
+##initial conditions for scalars
+#Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
+#dGkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/z - (np.cos(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
+#Gkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
+#dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
+
+#initial conditions
+Gkrin = ((1/(np.sqrt(2*kp)))/z)[k_aHinind]
+dGkrin = ((((-1/(2*np.sqrt(2*kp)))/z**2))*(dz+(2*z)))[k_aHinind]
+Gkiin = 0
+dGkiin = (-np.sqrt(kp/2)/(anew*Hinf*z))[k_aHinind]
+
+##initial conditions for tensors
+#hkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
+#dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
+#hkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
+#dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
 
 #initial conditions for tensors
-hkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
-dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
-hkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
-dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
+hkrin = ((1/(np.sqrt(2*kp)))/anew)[k_aHinind]
+dhkrin = ((-1/(np.sqrt(2*kp)))/anew)[k_aHinind]
+hkiin = 0
+dhkiin = -np.sqrt(kp/2)/(anew*Hinf*anew)[k_aHinind]
 
 ##Interpolating Hinf, epsilon1, epsilon2
 Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
@@ -338,8 +350,32 @@ k = np.logspace(-4, 0, 100)
 finGr = []
 finGi = []
 for i in k:
-	finGrsol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkrin,dGkrin],t_eval=efolds,args = (i, ))
-	finGisol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkiin,dGkiin],t_eval=efolds,args = (i, ))
+	k_aH = i/(anew*Hinf)
+
+	#initial N (Ni)
+	k_aHin = []
+	for j in k_aH:
+		if j > 100:
+			k_aHin.append(j)
+
+	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
+	Ni = N[k_aHinind]
+	
+	#end N (Ne)
+	k_aHen = []
+	for j in k_aH:
+		if j < 1e-5:
+			k_aHen.append(j)
+
+	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
+	Ne = N[k_aHenind]
+	efoldsg = np.arange(Ni, Ne, 0.0001)
+	Gkrin = ((1/(np.sqrt(2*i)))/z)[k_aHinind]
+	dGkrin = ((((-1/(2*np.sqrt(2*i)))/z**2))*(dz+(2*z)))[k_aHinind]
+	Gkiin = 0
+	dGkiin = (-np.sqrt(i/2)/(anew*Hinf*z))[k_aHinind]
+	finGrsol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkrin,dGkrin],t_eval=efoldsg,args = (i, ))
+	finGisol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkiin,dGkiin],t_eval=efoldsg,args = (i, ))
 	finGr.append(finGrsol.y[0][-1])
 	finGi.append(finGisol.y[0][-1])
 
@@ -353,8 +389,33 @@ def Pt(kk,ahkr,ahki):
 finhr = []
 finhi = []
 for i in k:
-	finhrsol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkrin,dhkrin],t_eval=efolds,args = (i, ))
-	finhisol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkiin,dhkiin],t_eval=efolds,args = (i, ))
+	k_aH = i/(anew*Hinf)
+
+	#initial N (Ni)
+	k_aHin = []
+	for j in k_aH:
+		if j > 100:
+			k_aHin.append(j)
+
+	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
+	Ni = N[k_aHinind]
+	
+	#end N (Ne)
+	k_aHen = []
+	for j in k_aH:
+		if j < 1e-5:
+			k_aHen.append(j)
+
+	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
+	Ne = N[k_aHenind]
+	efoldsh = np.arange(Ni, Ne, 0.0001)
+	
+	hkrin = ((1/(np.sqrt(2*i)))/anew)[k_aHinind]
+	dhkrin = ((-1/(np.sqrt(2*i)))/anew)[k_aHinind]
+	hkiin = 0
+	dhkiin = -np.sqrt(i/2)/(anew*Hinf*anew)[k_aHinind]
+	finhrsol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkrin,dhkrin],t_eval=efoldsh,args = (i, ))
+	finhisol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkiin,dhkiin],t_eval=efoldsh,args = (i, ))
 	finhr.append(finhrsol.y[0][-1])
 	finhi.append(finhisol.y[0][-1])
 
