@@ -21,11 +21,6 @@ plt.title('Change in scale factor with time')
 plt.show()
 
 def integrand(x):
-	Or=2.47e-5/(67.36/100.0)**2
-	Om=0.3153
-	Ok = 0.0e0
-	Ol=1-Or-Om-Ok
-	H0=67.36
 	int = dtLCDM(x,Or,Om,Ok,Ol,H0)
 	return int
 
@@ -50,7 +45,7 @@ for i in a:
 	x = sy.Integral(integrand(x),(x,0,i))
 	Age = x.evalf()*C
 	Ages.append(Age)
-	print("scale factor = ", i, "Age = ", Age)
+	#print("scale factor = ", i, "Age = ", Age)
 
 up = []
 down = []

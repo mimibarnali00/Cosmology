@@ -21,11 +21,6 @@ plt.title('Change in scale factor with time')
 plt.show()
 
 def integrand(x):
-	Or=2.47e-5/(67.36/100.0)**2
-	Om=0.3153
-	Ok = 0.0e0
-	Ol=1-Or-Om-Ok
-	H0=67.36
 	int = dtLCDM(x,Or,Om,Ok,Ol,H0)
 	return int
 
@@ -40,11 +35,8 @@ Ages = []
 ok = np.linspace(-1,1,100)
 for i in ok:
 	def integrand(x):
-		Or=2.47e-5/(67.36/100.0)**2
-		Om=0.3153
 		Ok = i
 		Ol=1-Or-Om-Ok
-		H0=67.36
 		int = dtLCDM(x,Or,Om,Ok,Ol,H0)
 		return int
 

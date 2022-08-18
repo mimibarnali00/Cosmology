@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
+from scipy.interpolate import interp1d
 
 def potential(phi,potparams):
 	mass = potparams
@@ -138,13 +139,6 @@ zer = np.zeros(np.size(epsilon2)+1)
 zer[1:] = epsilon2
 epsilon2 = zer
 
-#G = psi + delphi/dphidN
-def perturbeq(N,G,k,H,eps1,eps2):
-	a = np.exp(N)
-	Gk, GkN = G
-	GkNN = - (3-eps1+eps2)*GkN - (k/(a*H))**2*Gk
-	return GkN,GkNN
-
 #finding ai (Kp exits H at Ne=50)
 kp = 0.05 #Mpc^-1
 Np = N[infl-1]-50 #=Nend-50
@@ -186,50 +180,146 @@ print("Ne = ",Ne)
 
 #############
 eta = -1/(anew*Hinf)
-
-vk = np.exp(-i*kp*eta)/(np.sqrt(2*kp))
-dvk = (-i*kp)*np.exp(-i*kp*eta)/(np.sqrt(2*kp))
-
 z = anew*np.sqrt(2*epsilon1)
 dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
 
-Gk = vk/z
-dGk = dvk/z - vk*dz/(z**2)
+#initial conditions for scalars
+Gkin = ((np.exp(-i*kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
+dGkin = (((-i*kp)*np.exp(-i*kp*eta)/(np.sqrt(2*kp)))/z - (np.exp(-i*kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
 
-#initial conditions
-ain = anew[k_aHinind]
-etain = eta[k_aHinind]
+#initial conditions for tensors
+hkin = ((np.exp(-i*kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
+dhkin = (((-i*kp)*np.exp(-i*kp*eta)/(np.sqrt(2*kp)))/anew - (np.exp(-i*kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
 
-vkin = vk[k_aHinind]
-dvkin = dvk[k_aHinind]
+##Interpolating Hinf, epsilon1, epsilon2
+Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
+epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
+epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
 
-zin = z[k_aHinind]
-dzin = dz[k_aHinind]
+#Perturbation eq in efolds
+#G = psi + delphi/dphidN
+def scalarperturbeq(N,G,k):
+	a = ai*np.exp(N)
+	Gk, GkN = G
+	GkNN = - (3.0 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - ((k/(a*Hinf_cubic(N)))**2)*Gk
+	return GkN,GkNN
 
-Gkin = Gk[k_aHinind]
-dGkin = dGk[k_aHinind]
-#print(ain,etain,vkin,dvkin,zin,dzin,Gkin,dGkin)
-
-N = np.linspace(Ni, Ne, np.size(Hinf))
+efolds = np.arange(Ni, Ne, 0.0001)
 
 Nfin = []
 G = []
 dG = []
-for i in range(np.size(N)-1):
-	Gsol = solve_ivp(perturbeq,[N[i],N[i+1]],[Gk[i],dGk[i]],args = (kp,Hinf[i],epsilon1[i],epsilon2[i]),dense_output=True) #default RK45
-	Nfin.append(Gsol.t[0])
-	G.append(Gsol.y[0][0])
-	dG.append(Gsol.y[1][0])
-	
-print(np.size(Nfin),np.size(G),np.size(dG))
-plt.plot(Nfin,G)
-plt.yscale('log')
-plt.xlabel('N')
-plt.ylabel('$\zeta_{k}$')
+
+Gsol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkin,dGkin],t_eval=efolds,args = (0.05, )) #default RK45
+print(Gsol)
+Nfin = Gsol.t
+G = Gsol.y[0]
+dG = Gsol.y[1]
+
+#Plots
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
+ax1.plot(Nfin,G)
+ax1.set_xlabel('N')
+ax1.set_ylabel('$\zeta_{k}$')
+
+ax2.plot(Nfin,np.abs(G))
+ax2.set_yscale('log')
+ax2.set_xlabel('N')
+ax2.set_ylabel('$\zeta_{k}$')
+
+ax3.plot(Nfin,dG)
+ax3.set_xlabel('N')
+ax3.set_ylabel('$\zeta\'_{k}$')
+
+ax4.plot(Nfin,np.abs(dG))
+ax4.set_yscale('log')
+ax4.set_xlabel('N')
+ax4.set_ylabel('$\zeta\'_{k}$')
 plt.show()
 
-plt.plot(Nfin,dG)
-#plt.yscale('log')
-plt.xlabel('N')
-plt.ylabel('$\zeta\'_{k}$')
+#Tensor Perturbation eq in efolds
+def tensorperturbeq(N,h,k):
+	a = ai*np.exp(N)
+	hk, hkN = h
+	hkNN = - (3.0 - epsilon1_cubic(N))*hkN - ((k/(a*Hinf_cubic(N)))**2)*hk
+	return hkN,hkNN
+
+efolds = np.arange(Ni, Ne, 0.0001)
+
+Nhfin = []
+h = []
+dh = []
+
+hsol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkin,dhkin],t_eval=efolds,args = (0.05, )) #default RK45
+#print(hsol)
+Nhfin = hsol.t
+h = hsol.y[0]
+dh = hsol.y[1]
+
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
+ax1.plot(Nhfin,h)
+ax1.set_xlabel('N')
+ax1.set_ylabel('$h_{k}$')
+
+ax2.plot(Nhfin,np.abs(h))
+ax2.set_yscale('log')
+ax2.set_xlabel('N')
+ax2.set_ylabel('$h_{k}$')
+
+ax3.plot(Nhfin,dh)
+ax3.set_xlabel('N')
+ax3.set_ylabel('$h\'_{k}$')
+
+ax4.plot(Nhfin,np.abs(dh))
+ax4.set_yscale('log')
+ax4.set_xlabel('N')
+ax4.set_ylabel('$h\'_{k}$')
 plt.show()
+
+#scalar power spectrum 
+def Ps(kk,aGk):
+	aGk = np.array(aGk)
+	Ps = ((kk**3)/(2*np.pi**2))*(aGk*aGk) #for a given k
+	return Ps
+
+k = np.logspace(-4, 0, 100)
+finG = []
+for i in k:
+	finGsol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkin,dGkin],t_eval=efolds,args = (i, ))
+	finG.append(finGsol.y[0][-1])
+
+#tensor power spectrum 
+def Pt(kk,ahk):
+	ahk = np.array(ahk)
+	Pt = ((8*kk**3)/(2*np.pi**2))*(ahk*ahk) #for a given k
+	return Pt
+
+finh = []
+for i in k:
+	finhsol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkin,dhkin],t_eval=efolds,args = (i, ))
+	finh.append(finhsol.y[0][-1])
+
+plt.plot(k,Ps(k,finG))
+plt.plot(k,Pt(k,finh))
+plt.xscale('log')
+plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.ylabel("${\cal P}_{S/T}(k)$")
+plt.show()
+
+####writing values in files
+np.savetxt('Backgroundc.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2, eta]).T, delimiter='\t', fmt="%s",header='N   phi   eps1   V   H   z   zN   phiN   eps2   eta')
+
+np.savetxt('Perturbedc.txt', np.array([efolds, G, dG, h, dh]).T, delimiter='\t', fmt="%s",header='N   G   GN   h   hN')
+
+np.savetxt('Powerspectrumc.txt', np.array([k, finG, Ps(k,finG), finh, Pt(k,finh)]).T, delimiter='\t', fmt="%s",header='k   Gk   Ps   hk   Pt')
+

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
+from scipy.interpolate import interp1d
 
 def potential(phi,potparams):
 	mass = potparams
@@ -127,23 +128,18 @@ plt.legend()
 plt.show()
 
 ##Perturbation equation
+#epsilon2
 deps2dN = []
 for i in range(np.size(N)-1):
 	ans = ((epsilon1[i+1]-epsilon1[i])/(N[i+1]-N[i]))
 	deps2dN.append(ans)
 
 epsilon2 = np.divide(deps2dN,epsilon1[1:])
+
 #Making size of epsilon1 = size of epsilon2 by adding a 0 as first element
 zer = np.zeros(np.size(epsilon2)+1)
 zer[1:] = epsilon2
 epsilon2 = zer
-
-#G = psi + delphi/dphidN
-def perturbeq(N,G,k,H,eps1,eps2):
-	a = np.exp(N)
-	Gk, GkN = G
-	GkNN = - (3-eps1+eps2)*GkN - (k/(a*H))**2*Gk
-	return GkN,GkNN
 
 #finding ai (Kp exits H at Ne=50)
 kp = 0.05 #Mpc^-1
@@ -154,7 +150,7 @@ for i in N:
 		ex.append(i)
 
 ind1 = np.where(N == ex[-1])[0][0]
-print(ind1,N[ind1])
+#print(ind1,N[ind1])
 ai = kp/(np.exp(N[ind1])*Hinf[ind1]) #Mpc^-1/Mpl
 print("ai = ",ai)
 
@@ -186,28 +182,29 @@ print("Ne = ",Ne)
 
 #############
 eta = -1/(anew*Hinf)
-
-vkr = np.cos(kp*eta)/(np.sqrt(2*kp))
-dvkr = (-kp)*np.sin(kp*eta)/(np.sqrt(2*kp))
-vki = -np.sin(kp*eta)/(np.sqrt(2*kp))
-dvki = (-kp)*np.cos(kp*eta)/(np.sqrt(2*kp))
-
 z = anew*np.sqrt(2*epsilon1)
 dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
 
-Gkr = vkr/z
-dGkr = dvkr/z - vkr*dz/(z**2)
-Gki = vki/z
-dGki = dvki/z - vki*dz/(z**2)
-
 #initial conditions
-Gkrin = Gkr[k_aHinind]
-dGkrin = dGkr[k_aHinind]
-Gkiin = Gki[k_aHinind]
-dGkiin = dGki[k_aHinind]
-#print(ain,etain,vkin,dvkin,zin,dzin,Gkin,dGkin)
+Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
+dGkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/z - (np.cos(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
+Gkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
+dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
 
-N = np.linspace(Ni, Ne, np.size(Hinf))
+##Interpolating Hinf, epsilon1, epsilon2
+Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
+epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
+epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
+
+#Perturbation eq in efolds
+#G = psi + delphi/dphidN
+def perturbeq(N,G,k):
+	a = ai*np.exp(N)
+	Gk, GkN = G
+	GkNN = - (3.0 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - ((k/(a*Hinf_cubic(N)))**2)*Gk
+	return GkN,GkNN
+
+efolds = np.arange(Ni, Ne, 0.0001)
 
 Nrfin = []
 Nifin = []
@@ -215,17 +212,19 @@ Gr = []
 dGr = []
 Gi = []
 dGi = []
-for i in range(np.size(N)-1):
-	Grsol = solve_ivp(perturbeq,[N[i],N[i+1]],[Gkr[i],dGkr[i]],args = (kp,Hinf[i],epsilon1[i],epsilon2[i]),dense_output=True) #default RK45
-	Nrfin.append(Grsol.t[0])
-	Gr.append(Grsol.y[0][0])
-	dGr.append(Grsol.y[1][0])
 
-for i in range(np.size(N)-1):
-	Gisol = solve_ivp(perturbeq,[N[i],N[i+1]],[Gki[i],dGki[i]],args = (kp,Hinf[i],epsilon1[i],epsilon2[i]),dense_output=True) #default RK45
-	Nifin.append(Gisol.t[0])
-	Gi.append(Gisol.y[0][0])
-	dGi.append(Gisol.y[1][0])
+Grsol = solve_ivp(perturbeq,[Ni,Ne],[Gkrin,dGkrin],t_eval=efolds,args = (0.05, )) #default RK45
+print(Grsol)
+Nrfin = Grsol.t
+Gr = Grsol.y[0]
+dGr = Grsol.y[1]
+
+#############################################
+Gisol = solve_ivp(perturbeq,[Ni,Ne],[Gkiin,dGkiin],t_eval=efolds,args = (0.05, )) #default RK45
+print(Gisol)
+Nifin = Gisol.t
+Gi = Gisol.y[0]
+dGi = Gisol.y[1]
 
 fig = plt.figure()
 ax1 = fig.add_subplot(221)
@@ -259,3 +258,10 @@ ax4.set_xlabel('N')
 ax4.set_ylabel('$\zeta\'_{k}$')
 ax4.legend()
 plt.show()
+
+####make different files to store bg values and perturbed values
+####remove unnecessary things in code
+###tensor perturbations
+###by friday produce power spectrum
+###double precision to remove fluctuations
+###keep time of run
