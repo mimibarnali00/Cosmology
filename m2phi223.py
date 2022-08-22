@@ -156,29 +156,32 @@ print("ai = ",ai)
 
 anew = ai*np.exp(N)
 
-k_aH = kp/(anew*Hinf)
+def NiNe(kkp):
+	k_aH = kkp/(anew*Hinf)
+	#initial N (Ni)
+	k_aHin = []
+	for i in k_aH:
+		if i > 100:
+			k_aHin.append(i)
 
-#initial N (Ni)
-k_aHin = []
-for i in k_aH:
-	if i > 100:
-		k_aHin.append(i)
+	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
+	Ni = N[k_aHinind]
+	#end N (Ne)
+	k_aHen = []
+	for i in k_aH:
+		if i < 1e-5:
+			k_aHen.append(i)
 
-k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
-Ni = N[k_aHinind]
-print("k_aHin = ",k_aHin[-1])
-print("Ni = ",Ni)
+	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
+	Ne = N[k_aHenind]
+	
+	efolds = np.arange(Ni, Ne, 0.0001)
+	return k_aHin,k_aHinind,Ni,k_aHen,k_aHenind,Ne,efolds
 
-#end N (Ne)
-k_aHen = []
-for i in k_aH:
-	if i < 1e-5:
-		k_aHen.append(i)
-
-k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
-Ne = N[k_aHenind]
-print("k_aHen = ",k_aHen[0])
-print("Ne = ",Ne)
+print("k_aHin = ",NiNe(kp)[0][-1])
+print("Ni = ",NiNe(kp)[2])
+print("k_aHen = ",NiNe(kp)[3][0])
+print("Ne = ",NiNe(kp)[5])
 
 #############
 eta = -1/(anew*Hinf)
@@ -186,28 +189,28 @@ z = anew*np.sqrt(2*epsilon1)
 dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
 
 ##initial conditions for scalars
-#Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
-#dGkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/z - (np.cos(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
-#Gkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/z)[k_aHinind]
-#dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[k_aHinind]
+Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[NiNe(kp)[1]]
+dGkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/z - (np.cos(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[NiNe(kp)[1]]
+Gkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/z)[NiNe(kp)[1]]
+dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2*kp)))*dz/(z**2))[NiNe(kp)[1]]
 
-#initial conditions
-Gkrin = ((1/(np.sqrt(2*kp)))/z)[k_aHinind]
-dGkrin = ((((-1/(2*np.sqrt(2*kp)))/z**2))*(dz+(2*z)))[k_aHinind]
-Gkiin = 0
-dGkiin = (-np.sqrt(kp/2)/(anew*Hinf*z))[k_aHinind]
+#initial conditions for scalars with phase factor = 0
+#Gkrin = ((1/(np.sqrt(2*kp)))/z)[NiNe(kp)[1]]
+#dGkrin = ((((-1/(2*np.sqrt(2*kp)))/z**2))*(dz+(2*z)))[NiNe(kp)[1]]
+#Gkiin = 0
+#dGkiin = (-np.sqrt(kp/2)/(anew*Hinf*z))[NiNe(kp)[1]]
 
 ##initial conditions for tensors
-#hkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
-#dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
-#hkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
-#dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[k_aHinind]
+hkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+hkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
 
-#initial conditions for tensors
-hkrin = ((1/(np.sqrt(2*kp)))/anew)[k_aHinind]
-dhkrin = ((-1/(np.sqrt(2*kp)))/anew)[k_aHinind]
-hkiin = 0
-dhkiin = -np.sqrt(kp/2)/(anew*Hinf*anew)[k_aHinind]
+#initial conditions for tensors with phase factor = 0
+#hkrin = ((1/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+#dhkrin = ((-1/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+#hkiin = 0
+#dhkiin = -np.sqrt(kp/2)/(anew*Hinf*anew)[NiNe(kp)[1]]
 
 ##Interpolating Hinf, epsilon1, epsilon2
 Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
@@ -222,8 +225,6 @@ def scalarperturbeq(N,G,k):
 	GkNN = - (3.0 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - ((k/(a*Hinf_cubic(N)))**2)*Gk
 	return GkN,GkNN
 
-efolds = np.arange(Ni, Ne, 0.0001)
-
 Nrfin = []
 Nifin = []
 Gr = []
@@ -231,14 +232,14 @@ dGr = []
 Gi = []
 dGi = []
 
-Grsol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkrin,dGkrin],t_eval=efolds,args = (0.05, )) #default RK45
+Grsol = solve_ivp(scalarperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[Gkrin,dGkrin],t_eval=NiNe(kp)[6],args = (kp, )) #default RK45
 #print(Grsol)
 Nrfin = Grsol.t
 Gr = Grsol.y[0]
 dGr = Grsol.y[1]
 
 #############################################
-Gisol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkiin,dGkiin],t_eval=efolds,args = (0.05, )) #default RK45
+Gisol = solve_ivp(scalarperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[Gkiin,dGkiin],t_eval=NiNe(kp)[6],args = (kp, )) #default RK45
 #print(Gisol)
 Nifin = Gisol.t
 Gi = Gisol.y[0]
@@ -284,8 +285,6 @@ def tensorperturbeq(N,h,k):
 	hkNN = - (3.0 - epsilon1_cubic(N))*hkN - ((k/(a*Hinf_cubic(N)))**2)*hk
 	return hkN,hkNN
 
-efolds = np.arange(Ni, Ne, 0.0001)
-
 Nhrfin = []
 Nhifin = []
 hr = []
@@ -293,14 +292,14 @@ dhr = []
 hi = []
 dhi = []
 
-hrsol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkrin,dhkrin],t_eval=efolds,args = (0.05, )) #default RK45
+hrsol = solve_ivp(tensorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[hkrin,dhkrin],t_eval=NiNe(kp)[6],args = (kp, )) #default RK45
 #print(hrsol)
 Nhrfin = hrsol.t
 hr = hrsol.y[0]
 dhr = hrsol.y[1]
 
 #############################################
-hisol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkiin,dhkiin],t_eval=efolds,args = (0.05, )) #default RK45
+hisol = solve_ivp(tensorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[hkiin,dhkiin],t_eval=NiNe(kp)[6],args = (kp, )) #default RK45
 #print(hisol)
 Nhifin = hisol.t
 hi = hisol.y[0]
@@ -350,32 +349,12 @@ k = np.logspace(-4, 0, 100)
 finGr = []
 finGi = []
 for i in k:
-	k_aH = i/(anew*Hinf)
-
-	#initial N (Ni)
-	k_aHin = []
-	for j in k_aH:
-		if j > 100:
-			k_aHin.append(j)
-
-	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
-	Ni = N[k_aHinind]
-	
-	#end N (Ne)
-	k_aHen = []
-	for j in k_aH:
-		if j < 1e-5:
-			k_aHen.append(j)
-
-	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
-	Ne = N[k_aHenind]
-	efoldsg = np.arange(Ni, Ne, 0.0001)
-	Gkrin = ((1/(np.sqrt(2*i)))/z)[k_aHinind]
-	dGkrin = ((((-1/(2*np.sqrt(2*i)))/z**2))*(dz+(2*z)))[k_aHinind]
+	Gkrin = ((1/(np.sqrt(2*i)))/z)[NiNe(i)[1]]
+	dGkrin = ((((-1/(2*np.sqrt(2*i)))/z**2))*(dz+(2*z)))[NiNe(i)[1]]
 	Gkiin = 0
-	dGkiin = (-np.sqrt(i/2)/(anew*Hinf*z))[k_aHinind]
-	finGrsol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkrin,dGkrin],t_eval=efoldsg,args = (i, ))
-	finGisol = solve_ivp(scalarperturbeq,[Ni,Ne],[Gkiin,dGkiin],t_eval=efoldsg,args = (i, ))
+	dGkiin = (-np.sqrt(i/2)/(anew*Hinf*z))[NiNe(i)[1]]
+	finGrsol = solve_ivp(scalarperturbeq,[NiNe(i)[2],NiNe(i)[5]],[Gkrin,dGkrin],t_eval=NiNe(i)[6],args = (i, ))
+	finGisol = solve_ivp(scalarperturbeq,[NiNe(i)[2],NiNe(i)[5]],[Gkiin,dGkiin],t_eval=NiNe(i)[6],args = (i, ))
 	finGr.append(finGrsol.y[0][-1])
 	finGi.append(finGisol.y[0][-1])
 
@@ -389,49 +368,51 @@ def Pt(kk,ahkr,ahki):
 finhr = []
 finhi = []
 for i in k:
-	k_aH = i/(anew*Hinf)
-
-	#initial N (Ni)
-	k_aHin = []
-	for j in k_aH:
-		if j > 100:
-			k_aHin.append(j)
-
-	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
-	Ni = N[k_aHinind]
-	
-	#end N (Ne)
-	k_aHen = []
-	for j in k_aH:
-		if j < 1e-5:
-			k_aHen.append(j)
-
-	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
-	Ne = N[k_aHenind]
-	efoldsh = np.arange(Ni, Ne, 0.0001)
-	
-	hkrin = ((1/(np.sqrt(2*i)))/anew)[k_aHinind]
-	dhkrin = ((-1/(np.sqrt(2*i)))/anew)[k_aHinind]
+	hkrin = ((1/(np.sqrt(2*i)))/anew)[NiNe(i)[1]]
+	dhkrin = ((-1/(np.sqrt(2*i)))/anew)[NiNe(i)[1]]
 	hkiin = 0
-	dhkiin = -np.sqrt(i/2)/(anew*Hinf*anew)[k_aHinind]
-	finhrsol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkrin,dhkrin],t_eval=efoldsh,args = (i, ))
-	finhisol = solve_ivp(tensorperturbeq,[Ni,Ne],[hkiin,dhkiin],t_eval=efoldsh,args = (i, ))
+	dhkiin = -np.sqrt(i/2)/(anew*Hinf*anew)[NiNe(i)[1]]
+	finhrsol = solve_ivp(tensorperturbeq,[NiNe(i)[2],NiNe(i)[5]],[hkrin,dhkrin],t_eval=NiNe(i)[6],args = (i, ))
+	finhisol = solve_ivp(tensorperturbeq,[NiNe(i)[2],NiNe(i)[5]],[hkiin,dhkiin],t_eval=NiNe(i)[6],args = (i, ))
 	finhr.append(finhrsol.y[0][-1])
 	finhi.append(finhisol.y[0][-1])
 
-plt.plot(k,Ps(k,finGr,finGi))
-plt.plot(k,Pt(k,finhr,finhi))
+plt.plot(k,Ps(k,finGr,finGi),label="Scalar Power spectrum")
+plt.plot(k,Pt(k,finhr,finhi),label="Tensor Power spectrum")
+plt.title("Primordial power spectra")
 plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("${\cal P}_{S/T}(k)$")
+plt.legend()
+plt.show()
+
+plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
+plt.title("Tensor to scalar ratio")
+plt.xscale('log')
+plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.ylabel("r(k)")
+#plt.ylim([0,0.5])
+plt.show()
+
+#spectral tilt [ns = 1+((d ln Ps)/(d ln k))]
+lnPs = np.log(Ps(k,finGr,finGi))
+lnk = np.log(k)
+dlnk = lnk[1]-lnk[0]
+ns = 1+np.gradient(lnPs,dlnk)
+
+plt.plot(k,ns)
+plt.title("Spectral index")
+plt.xscale('log')
+plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.ylabel("$n_{s}(k)$")
+plt.ylim([0.9,1])
 plt.show()
 
 ####writing values in files
-np.savetxt('Background.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2, eta]).T, delimiter='\t', fmt="%s",header='N   phi   eps1   V   H   z   zN   phiN   eps2   eta')
+np.savetxt('Background.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2, eta]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2    eta')
 
-np.savetxt('Perturbed.txt', np.array([efolds, Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N   realG   imgG   realGN   imgGN   realh   imgh   realhN   imghN')
+np.savetxt('Perturbed.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
 
-np.savetxt('Powerspectrum.txt', np.array([k, finGr, finGi, Ps(k,finGr,finGi), finhr, finhi, Pt(k,finhr,finhi)]).T, delimiter='\t', fmt="%s",header='k   realGk   imgGk   Ps   realhk   imghk   Pt')
+np.savetxt('Powerspectrum.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi)]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r')
 
-###by friday produce power spectrum
 ###double precision to remove fluctuations
