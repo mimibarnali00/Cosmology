@@ -19,17 +19,18 @@ def bgeqn(Phi,N,potparams):
 	return dphidN,d2phidN2
 	
 potparams = np.zeros(2)
-potparams[0] = 7.17*10**(-8)     #value of mass
+#potparams[0] = 7.17e-8     #value of mass
+potparams[0] = 2.6e-7     #value of mass
 potparams[1] = 1.9654     #value of phi0(in paper) or a(in here) 
 
 
 #Initial condition
 phi0 = np.zeros(2)
-phi0[0] = 12
+phi0[0] = 14.8
 Vini,dV_ini = potential(phi0[0],potparams)
 phi0[1] = -dV_ini/Vini
 
-N = np.arange(0,110,5e-3)
+N = np.arange(0,120,5e-3)
 
 phi = odeint(bgeqn,phi0,N,args = (potparams,))
 V,dV = potential(phi[:,0],potparams)
@@ -81,7 +82,7 @@ MplGeV=2.4e18 #Planck mass (1/sqrt(8 pi G)) to GeV
 
 Const=Km/MPc/C/mGeVinv/MplGeV
 
-a = np.logspace(-110, 0, 1000)
+a = np.logspace(-120, 0, 1000)
 Hz = np.zeros(len(a))
 Hz = H(a,Or,Om,Ok,Ol,H0)*Const
 RadH = 1/Hz
@@ -97,7 +98,7 @@ for i in lambda1:
 
 tr = np.where(lambda1 == down[-1])[0][0]
 pr = np.log10(a)[tr]
-extra = -4.43
+extra = -24
 aN = N*0.4343+pr+extra
 
 down1 = []
@@ -108,7 +109,7 @@ for i in RadH:
 tr1 = np.where(RadH == down1[-1])[0][0]
 pr1 = np.log10(a)[tr1]
 
-plt.xlim([-60,0])
+plt.xlim([-100,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
 plt.ylabel(r'$\frac{1}{H(a)} [1/M_{Pl}]$')
@@ -123,7 +124,7 @@ plt.title('Physical lengthscales')
 plt.legend()
 plt.show()
 
-plt.xlim([-60,0])
+plt.xlim([-100,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
 plt.ylabel(r'$\frac{1}{aH(a)} [1/M_{Pl}]$')
@@ -356,7 +357,7 @@ def Ps(kk,aGkr,aGki):
 	Ps = ((kk**3)/(2*np.pi**2))*((aGkr*aGkr)+(aGki*aGki)) #for a given k
 	return Ps
 
-k = np.logspace(-4, 0, 100)
+k = np.logspace(-6, 0, 100)
 finGr = []
 finGi = []
 for i in k:
@@ -401,6 +402,7 @@ plt.show()
 plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
 plt.title("Tensor to scalar ratio")
 plt.xscale('log')
+plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("r(k)")
 #plt.ylim([0,0.5])
@@ -415,6 +417,7 @@ ns = 1+np.gradient(lnPs,dlnk)
 plt.plot(k,ns)
 plt.title("Spectral index")
 plt.xscale('log')
+plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("$n_{s}(k)$")
 plt.ylim([0.9,1])
