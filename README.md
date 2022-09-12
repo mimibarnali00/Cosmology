@@ -22,19 +22,34 @@ Files:
 6.[KGphi2sin.py](KGphi2sin.py)
   * Solves Klein Gordon equation for a random potential
 
-7.[horizon.py](horizon.py)
+7.[KGstaroI.py](KGstaroI.py)
+  * Solves Klein Gordon equation for potential for Starobinsky I model
+
+8.[KGstaroII.py](KGstaroII.py)
+  * Solves Klein Gordon equation for potential for Starobinsky II model
+
+9.[horizon.py](horizon.py)
   * Shows horizon for the $\Lambda$ CDM model
 
-8.[horizonforpotentials.py](horizonforpotentials.py)
+10.[horizonforpotentials.py](horizonforpotentials.py)
   * Shows complete horizon for $m^2\phi^2$, $\lambda\phi^4$, punctuated inflation and phi2sin potential joined with the $\Lambda$ CDM model
 
-9.[horizonproblem.py](horizonproblem.py)
+11.[horizonproblem.py](horizonproblem.py)
   * Shows how inflation solves the horizon problem
 
-10.[m2phi2.py](m2phi2.py)
-  * Will soon be solving scalar perturbation for $m^2\phi^2$ potential
+12.[model_m2phi2.py](model_m2phi2.py)
+  * Solves scalar and tensor perturbation equations for $m^2\phi^2$ potential. Plots power spectrum, tensor to scalar ratio and spectral index.
 
-11.[tNtau.py](tNtau.py)
+13.[model_PI.py](model_PI.py)
+  * Solves scalar and tensor perturbation equations for potential for Punctuated Inflaton model. Plots power spectrum, tensor to scalar ratio and spectral index.
+
+14.[model_staroI.py](model_staroI.py)
+  * Solves scalar and tensor perturbation equations for potential for Starobinsky I model. Plots power spectrum, tensor to scalar ratio and spectral index.
+
+15.[model_staroII.py](model_staroII.py)
+  * Solves scalar and tensor perturbation equations for potential for Starobinsky II model. Plots power spectrum, tensor to scalar ratio and spectral index.
+
+16.[tNtau.py](tNtau.py)
   * Shows relation among cosmic time, conformal time and efolds graphically
 
 -------------------------------------------------------------------
