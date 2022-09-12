@@ -436,26 +436,20 @@ plt.ylabel("${\cal P}_{S/T}(k)$")
 plt.legend()
 #plt.show()
 
-perrs = []
-for i in k:
-	percenterrscalar = (np.abs(Ps(i,finGr,finGi)-PSR(NiNe(i)[6],i)[0][0])/PSR(NiNe(i)[6],i)[0][0])*100
-	perrs.append(percenterrscalar[0])
+percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 
 plt.figure()
 plt.title("Percentage error in scalar power spectra")
-plt.plot(k,perrs)
+plt.plot(k,percenterrscalar)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
 #plt.show()
 
-perrt = []
-for i in k:
-	percenterrtensor = (np.abs(Pt(i,finhr,finhi)-PSR(NiNe(i)[6],i)[1][0])/PSR(NiNe(i)[6],i)[1][0])*100
-	perrt.append(percenterrtensor[0])
+percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 
 plt.figure()
 plt.title("Percentage error in tensor power spectra")
-plt.plot(k,perrt)
+plt.plot(k,percenterrtensor)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
 #plt.show()
