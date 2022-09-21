@@ -165,28 +165,20 @@ anew = ai*np.exp(N)
 def NiNe(kkp):
 	k_aH = kkp/(anew*Hinf)
 	#initial N (Ni)
-	k_aHin = []
-	for i in k_aH:
-		if i > 100:
-			k_aHin.append(i)
-
-	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
+	k_aHinind = np.abs(k_aH - 100).argmin()
+	k_aHin = k_aH[k_aHinind]
 	Ni = N[k_aHinind]
 	#end N (Ne)
-	k_aHen = []
-	for i in k_aH:
-		if i < 1e-5:
-			k_aHen.append(i)
-
-	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
+	k_aHenind = np.abs(k_aH - 1e-5).argmin()
+	k_aHen = k_aH[k_aHenind]
 	Ne = N[k_aHenind]
 	
 	efolds = np.arange(Ni, Ne, 0.0001)
 	return k_aHin,k_aHinind,Ni,k_aHen,k_aHenind,Ne,efolds
 
-print("k_aHin = ",NiNe(kp)[0][-1])
+print("k_aHin = ",NiNe(kp)[0])
 print("Ni = ",NiNe(kp)[2])
-print("k_aHen = ",NiNe(kp)[3][0])
+print("k_aHen = ",NiNe(kp)[3])
 print("Ne = ",NiNe(kp)[5])
 
 #############

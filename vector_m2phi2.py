@@ -5,9 +5,9 @@ from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
 
 def potential(phi,potparams):
-	v0 = potparams
-	v = v0*(1 - (np.exp(-np.sqrt(2/3)*phi)))**2
-	dvdphi = (2*v0*np.sqrt(2/3))*(1 - (np.exp(-np.sqrt(2/3)*phi)))*(np.exp(-np.sqrt(2/3)*phi))
+	mass = potparams
+	v = 0.5*(mass**2)*phi*phi
+	dvdphi = mass**2*phi
 	return v,dvdphi
 
 def bgeqn(Phi,N,potparams):
@@ -17,11 +17,11 @@ def bgeqn(Phi,N,potparams):
 	d2phidN2 = -(3.-0.5*(dphidN*dphidN))*dphidN-(6.-(dphidN*dphidN))*dvdphi/(2.*v)
 	return dphidN,d2phidN2
 	
-potparams = 1.2e-9/8 #(7e-6)**2
+potparams = 7e-6
 
 #Initial condition
 phi0 = np.zeros(2)
-phi0[0] = 5.62
+phi0[0] = 16.5
 Vini,dV_ini = potential(phi0[0],potparams)
 phi0[1] = -dV_ini/Vini
 
@@ -40,8 +40,8 @@ for i in epsilon1:
 	if i > 1:
 		break
 
-plt.figure()
 infl = np.where(epsilon1 == eps1[-1])[0][0]
+plt.figure()
 plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N,epsilon1)
@@ -90,7 +90,7 @@ for i in lambda1:
 
 tr = np.where(lambda1 == down[-1])[0][0]
 pr = np.log10(a)[tr]
-extra = -4.43
+extra = -2.75
 aN = N*0.4343+pr+extra
 
 down1 = []
@@ -165,20 +165,28 @@ anew = ai*np.exp(N)
 def NiNe(kkp):
 	k_aH = kkp/(anew*Hinf)
 	#initial N (Ni)
-	k_aHinind = np.abs(k_aH - 100).argmin()
-	k_aHin = k_aH[k_aHinind]
+	k_aHin = []
+	for i in k_aH:
+		if i > 100:
+			k_aHin.append(i)
+
+	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
 	Ni = N[k_aHinind]
 	#end N (Ne)
-	k_aHenind = np.abs(k_aH - 1e-5).argmin()
-	k_aHen = k_aH[k_aHenind]
+	k_aHen = []
+	for i in k_aH:
+		if i < 1e-5:
+			k_aHen.append(i)
+
+	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
 	Ne = N[k_aHenind]
 	
 	efolds = np.arange(Ni, Ne, 0.0001)
 	return k_aHin,k_aHinind,Ni,k_aHen,k_aHenind,Ne,efolds
 
-print("k_aHin = ",NiNe(kp)[0])
+print("k_aHin = ",NiNe(kp)[0][-1])
 print("Ni = ",NiNe(kp)[2])
-print("k_aHen = ",NiNe(kp)[3])
+print("k_aHen = ",NiNe(kp)[3][0])
 print("Ne = ",NiNe(kp)[5])
 
 #############
@@ -338,6 +346,67 @@ ax4.set_ylabel('$h\'_{k}$')
 ax4.legend()
 #plt.show()
 
+#Vector Perturbation eq in efolds
+def vectorperturbeq(N,v,k):
+	a = ai*np.exp(N)
+	vk, vkN = v
+	vkNN = - (3.0 - epsilon1_cubic(N))*vkN - ((k/(a*Hinf_cubic(N)))**2)*vk
+	return vkN,vkNN
+
+Nvrfin = []
+Nvifin = []
+vr = []
+dvr = []
+vi = []
+dvi = []
+
+vrsol = solve_ivp(vectorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[vkrin,dvkrin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
+#print(vrsol)
+Nvrfin = vrsol.t
+vr = vrsol.y[0]
+dvr = vrsol.y[1]
+
+#############################################
+visol = solve_ivp(vectorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[vkiin,dvkiin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
+#print(visol)
+Nvifin = visol.t
+vi = visol.y[0]
+dvi = visol.y[1]
+
+fig = plt.figure()
+plt.title("Mode evolution plot (Vector) for pivot scale (k = 0.05)")
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
+ax1.plot(Nvrfin,vr,label = "Real")
+ax1.plot(Nvifin,vi,label = "Imaginary")
+ax1.set_xlabel('N')
+ax1.set_ylabel('$v_{k}$')
+ax1.legend()
+
+ax2.plot(Nvrfin,np.abs(vr),label = "Real")
+ax2.plot(Nvifin,np.abs(vi),label = "Imaginary")
+ax2.set_yscale('log')
+ax2.set_xlabel('N')
+ax2.set_ylabel('$v_{k}$')
+ax2.legend()
+
+ax3.plot(Nvrfin,dvr,label = "Real")
+ax3.plot(Nvifin,dvi,label = "Imaginary")
+ax3.set_xlabel('N')
+ax3.set_ylabel('$v\'_{k}$')
+ax3.legend()
+
+ax4.plot(Nvrfin,np.abs(dvr),label = "Real")
+ax4.plot(Nvifin,np.abs(dvi),label = "Imaginary")
+ax4.set_yscale('log')
+ax4.set_xlabel('N')
+ax4.set_ylabel('$v\'_{k}$')
+ax4.legend()
+#plt.show()
+
 #scalar power spectrum 
 def Ps(kk,aGkr,aGki):
 	aGkr = np.array(aGkr)
@@ -473,8 +542,8 @@ plt.ylim([0.9,1])
 plt.show()
 
 ####writing values in files
-np.savetxt('BackgroundstaroI.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
+np.savetxt('Backgroundm2phi2.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
 
-np.savetxt('PerturbedstaroI.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
+np.savetxt('Perturbedm2phi2.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
 
-np.savetxt('PowerspectrumstaroI.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
+np.savetxt('Powerspectrumm2phi2.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
