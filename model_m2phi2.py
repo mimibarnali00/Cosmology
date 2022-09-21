@@ -46,7 +46,7 @@ plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N,epsilon1)
 plt.title("$\epsilon_1$(N) vs N plot")
-#plt.show()
+##plt.show()
 
 #print(epsilon1[infl-1])
 plt.figure()
@@ -54,7 +54,7 @@ plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N[0:infl-1],epsilon1[0:infl-1])
 plt.title("$\epsilon_1$(N) vs N plot till the end of Inflation")
-#plt.show()
+##plt.show()
 
 def H(a,Or,Om,Ok,Ol,H0):
 	Hz = H0*((Or/a**4)+(Om/a**3)+(Ok/a**2)+Ol)**0.50e0
@@ -115,7 +115,7 @@ plt.axvline(np.log10(1/1101), 0, 1, label='CMB',color='red')
 plt.axvline(pr1, 0, 1, label='End of Inflation',color='violet')
 plt.title('Physical lengthscales')
 plt.legend()
-#plt.show()
+##plt.show()
 
 plt.figure()
 plt.xlim([-60,0])
@@ -131,7 +131,7 @@ plt.axvline(np.log10(1/1101), 0, 1, label='CMB',color='red')
 plt.axvline(pr1, 0, 1, label='End of Inflation',color='violet')
 plt.title('Comoving lengthscales')
 plt.legend()
-#plt.show()
+##plt.show()
 
 ##Perturbation equation
 #epsilon2
@@ -275,7 +275,7 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$\zeta\'_{k}$')
 ax4.legend()
-#plt.show()
+##plt.show()
 
 #Tensor Perturbation eq in efolds
 def tensorperturbeq(N,h,k):
@@ -336,7 +336,7 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$h\'_{k}$')
 ax4.legend()
-#plt.show()
+##plt.show()
 
 #scalar power spectrum 
 def Ps(kk,aGkr,aGki):
@@ -381,21 +381,7 @@ for i in k:
 def PSR(N,kk):
 	a = ai*np.exp(N)
 	kk_aH = kk/(a*Hinf_cubic(N))
-	kk_aHinup = []
-	kk_aHindown = []
-	for i in kk_aH:
-		if i > 1:
-			kk_aHinup.append(i)
-		if i < 1:
-			kk_aHindown.append(i)
-
-	kaHindexup = np.where(kk_aH == kk_aHinup[-1])[0][0]
-	kaHindexdown = np.where(kk_aH == kk_aHindown[0])[0][0]
-	kaHindex = []
-	if kaHindexup < kaHindexdown:
-		kaHindex.append(kaHindexup)
-	if kaHindexup > kaHindexdown:
-		kaHindex.append(kaHindexdown)
+	kaHindex = np.abs(kk_aH - 1).argmin()
 	
 	Psk = (0.5/epsilon1_cubic(N[kaHindex]))*(Hinf_cubic(N[kaHindex])/(2*np.pi))**2
 	Ptk = 8*(Hinf_cubic(N[kaHindex])/(2*np.pi))**2
@@ -408,13 +394,13 @@ ptsr = []
 rsr = []
 nssr = []
 for i in k:
-	pssr.append(PSR(NiNe(i)[6],i)[0][0])
+	pssr.append(PSR(NiNe(i)[6],i)[0])
 for i in k:
-	ptsr.append(PSR(NiNe(i)[6],i)[1][0])
+	ptsr.append(PSR(NiNe(i)[6],i)[1])
 for i in k:
-	rsr.append(PSR(NiNe(i)[6],i)[2][0])
+	rsr.append(PSR(NiNe(i)[6],i)[2])
 for i in k:
-	nssr.append(PSR(NiNe(i)[6],i)[3][0])
+	nssr.append(PSR(NiNe(i)[6],i)[3])
 
 plt.figure()
 plt.plot(k,Ps(k,finGr,finGi),label="Scalar Power spectrum")
@@ -426,7 +412,7 @@ plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("${\cal P}_{S/T}(k)$")
 plt.legend()
-#plt.show()
+##plt.show()
 
 percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 
@@ -435,7 +421,7 @@ plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
-#plt.show()
+##plt.show()
 
 percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 
@@ -444,7 +430,7 @@ plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
-#plt.show()
+##plt.show()
 
 plt.figure()
 plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
@@ -454,7 +440,7 @@ plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("r(k)")
 #plt.ylim([0,0.5])
-#plt.show()
+##plt.show()
 
 #spectral tilt [ns = 1+((d ln Ps)/(d ln k))]
 lnPs = np.log(Ps(k,finGr,finGi))
@@ -470,7 +456,7 @@ plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("$n_{s}(k)$")
 plt.ylim([0.9,1])
-plt.show()
+#plt.show()
 
 ####writing values in files
 np.savetxt('Backgroundm2phi2.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
