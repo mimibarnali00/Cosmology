@@ -165,28 +165,20 @@ anew = ai*np.exp(N)
 def NiNe(kkp):
 	k_aH = kkp/(anew*Hinf)
 	#initial N (Ni)
-	k_aHin = []
-	for i in k_aH:
-		if i > 100:
-			k_aHin.append(i)
-
-	k_aHinind = np.where(k_aH == k_aHin[-1])[0][0]
+	k_aHinind = np.abs(k_aH - 100).argmin()
+	k_aHin = k_aH[k_aHinind]
 	Ni = N[k_aHinind]
 	#end N (Ne)
-	k_aHen = []
-	for i in k_aH:
-		if i < 1e-5:
-			k_aHen.append(i)
-
-	k_aHenind = np.where(k_aH == k_aHen[0])[0][0]
+	k_aHenind = np.abs(k_aH - 1e-5).argmin()
+	k_aHen = k_aH[k_aHenind]
 	Ne = N[k_aHenind]
 	
 	efolds = np.arange(Ni, Ne, 0.0001)
 	return k_aHin,k_aHinind,Ni,k_aHen,k_aHenind,Ne,efolds
 
-print("k_aHin = ",NiNe(kp)[0][-1])
+print("k_aHin = ",NiNe(kp)[0])
 print("Ni = ",NiNe(kp)[2])
-print("k_aHen = ",NiNe(kp)[3][0])
+print("k_aHen = ",NiNe(kp)[3])
 print("Ne = ",NiNe(kp)[5])
 
 #############
@@ -217,6 +209,14 @@ dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqr
 #dhkrin = ((-1/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
 #hkiin = 0
 #dhkiin = -np.sqrt(kp/2)/(anew*Hinf*anew)[NiNe(kp)[1]]
+
+##initial conditions for vectors
+mm = 1e-8
+B = np.sqrt(kp**2 + anew**2*mm**2)
+vkrin = ((B*np.cos(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
+dvkrin = (((-kp**2/B)*np.cos(B*eta)/(np.sqrt(2*kp)))/anew - (B**2*np.sin(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
+vkiin = ((-B*np.sin(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
+dvkiin = ((-B**2*np.cos(B*eta)/(np.sqrt(2*kp)))/anew - (-(kp**2/B)*np.sin(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
 
 ##Interpolating Hinf, epsilon1, epsilon2
 Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
@@ -350,7 +350,7 @@ ax4.legend()
 def vectorperturbeq(N,v,k):
 	a = ai*np.exp(N)
 	vk, vkN = v
-	vkNN = - (3.0 - epsilon1_cubic(N))*vkN - ((k/(a*Hinf_cubic(N)))**2)*vk
+	vkNN = - (1.0 - epsilon1_cubic(N) + 2*(k**2)/(a**2*mm**2 + k**2))*vkN - ((a**2*mm**2 + k**2)/(a*Hinf_cubic(N))**2)*vk
 	return vkN,vkNN
 
 Nvrfin = []
@@ -446,25 +446,31 @@ for i in k:
 	finhr.append(finhrsol.y[0][-1])
 	finhi.append(finhisol.y[0][-1])
 
+#vector power spectrum 
+def Pv(kk,avkr,avki):
+	avkr = np.array(avkr)
+	avki = np.array(avki)
+	Pt = ((8*kk**3)/(2*np.pi**2))*((avkr*avkr)+(avki*avki)) #for a given k
+	return Pt
+
+finvr = []
+finvi = []
+for i in k:
+	B = np.sqrt(i**2 + anew**2*mm**2)
+	vkrin = ((B*np.cos(B*eta)/(np.sqrt(2*i)))/(i*anew))[NiNe(i)[1]]
+	dvkrin = (((-i**2/B)*np.cos(B*eta)/(np.sqrt(2*i)))/anew - (B**2*np.sin(B*eta)/(np.sqrt(2*i)))/(i*anew))[NiNe(i)[1]]
+	vkiin = ((-B*np.sin(B*eta)/(np.sqrt(2*i)))/(i*anew))[NiNe(i)[1]]
+	dvkiin = ((-B**2*np.cos(B*eta)/(np.sqrt(2*i)))/anew - (-(i**2/B)*np.sin(B*eta)/(np.sqrt(2*i)))/(i*anew))[NiNe(i)[1]]
+	finvrsol = solve_ivp(vectorperturbeq,[NiNe(i)[2],NiNe(i)[5]],[vkrin,dvkrin],t_eval=NiNe(i)[6],args = (i, ),atol=1e-32)
+	finvisol = solve_ivp(vectorperturbeq,[NiNe(i)[2],NiNe(i)[5]],[vkiin,dvkiin],t_eval=NiNe(i)[6],args = (i, ),atol=1e-32)
+	finvr.append(finvrsol.y[0][-1])
+	finvi.append(finvisol.y[0][-1])
+	
 #Slow roll approximation
 def PSR(N,kk):
 	a = ai*np.exp(N)
 	kk_aH = kk/(a*Hinf_cubic(N))
-	kk_aHinup = []
-	kk_aHindown = []
-	for i in kk_aH:
-		if i > 1:
-			kk_aHinup.append(i)
-		if i < 1:
-			kk_aHindown.append(i)
-
-	kaHindexup = np.where(kk_aH == kk_aHinup[-1])[0][0]
-	kaHindexdown = np.where(kk_aH == kk_aHindown[0])[0][0]
-	kaHindex = []
-	if kaHindexup < kaHindexdown:
-		kaHindex.append(kaHindexup)
-	if kaHindexup > kaHindexdown:
-		kaHindex.append(kaHindexdown)
+	kaHindex = np.abs(kk_aH - 1).argmin()
 	
 	Psk = (0.5/epsilon1_cubic(N[kaHindex]))*(Hinf_cubic(N[kaHindex])/(2*np.pi))**2
 	Ptk = 8*(Hinf_cubic(N[kaHindex])/(2*np.pi))**2
@@ -477,21 +483,23 @@ ptsr = []
 rsr = []
 nssr = []
 for i in k:
-	pssr.append(PSR(NiNe(i)[6],i)[0][0])
+	pssr.append(PSR(NiNe(i)[6],i)[0])
 for i in k:
-	ptsr.append(PSR(NiNe(i)[6],i)[1][0])
+	ptsr.append(PSR(NiNe(i)[6],i)[1])
 for i in k:
-	rsr.append(PSR(NiNe(i)[6],i)[2][0])
+	rsr.append(PSR(NiNe(i)[6],i)[2])
 for i in k:
-	nssr.append(PSR(NiNe(i)[6],i)[3][0])
+	nssr.append(PSR(NiNe(i)[6],i)[3])
 
 plt.figure()
 plt.plot(k,Ps(k,finGr,finGi),label="Scalar Power spectrum")
 plt.plot(k,Pt(k,finhr,finhi),label="Tensor Power spectrum")
+plt.plot(k,Pt(k,finvr,finvi),label="Vector Power spectrum")
 plt.plot(k,pssr,'g--',label="Scalar Power spectrum (Slow roll approximation)")
 plt.plot(k,ptsr,'m--',label="Tensor Power spectrum (Slow roll approximation)")
 plt.title("Primordial power spectra")
 plt.xscale('log')
+plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("${\cal P}_{S/T}(k)$")
 plt.legend()
