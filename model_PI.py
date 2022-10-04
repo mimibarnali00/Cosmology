@@ -212,9 +212,9 @@ dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2
 
 ##initial conditions for tensors
 hkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
-dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (Hinf*np.cos(kp*eta)/(np.sqrt(2*kp))))[NiNe(kp)[1]]
 hkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
-dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew + (Hinf*np.sin(kp*eta)/(np.sqrt(2*kp))))[NiNe(kp)[1]]
 
 #initial conditions for tensors with phase factor = 0
 #hkrin = ((1/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
