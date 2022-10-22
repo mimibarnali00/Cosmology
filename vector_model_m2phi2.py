@@ -46,7 +46,7 @@ plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N,epsilon1)
 plt.title("$\epsilon_1$(N) vs N plot")
-#plt.show()
+plt.show()
 
 #print(epsilon1[infl-1])
 plt.figure()
@@ -54,7 +54,7 @@ plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N[0:infl-1],epsilon1[0:infl-1])
 plt.title("$\epsilon_1$(N) vs N plot till the end of Inflation")
-#plt.show()
+plt.show()
 
 def H(a,Or,Om,Ok,Ol,H0):
 	Hz = H0*((Or/a**4)+(Om/a**3)+(Ok/a**2)+Ol)**0.50e0
@@ -115,7 +115,7 @@ plt.axvline(np.log10(1/1101), 0, 1, label='CMB',color='red')
 plt.axvline(pr1, 0, 1, label='End of Inflation',color='violet')
 plt.title('Physical lengthscales')
 plt.legend()
-#plt.show()
+plt.show()
 
 plt.figure()
 plt.xlim([-60,0])
@@ -131,7 +131,7 @@ plt.axvline(np.log10(1/1101), 0, 1, label='CMB',color='red')
 plt.axvline(pr1, 0, 1, label='End of Inflation',color='violet')
 plt.title('Comoving lengthscales')
 plt.legend()
-#plt.show()
+plt.show()
 
 ##Perturbation equation
 #epsilon2
@@ -200,9 +200,9 @@ dGkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/z - (-np.sin(kp*eta)/(np.sqrt(2
 
 ##initial conditions for tensors
 hkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
-dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dhkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (Hinf*np.cos(kp*eta)/(np.sqrt(2*kp))))[NiNe(kp)[1]]
 hkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
-dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew + (Hinf*np.sin(kp*eta)/(np.sqrt(2*kp))))[NiNe(kp)[1]]
 
 #initial conditions for tensors with phase factor = 0
 #hkrin = ((1/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
@@ -211,12 +211,10 @@ dhkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew - (-np.sin(kp*eta)/(np.sqr
 #dhkiin = -np.sqrt(kp/2)/(anew*Hinf*anew)[NiNe(kp)[1]]
 
 ##initial conditions for vectors
-mm = 1e-8
-B = np.sqrt(kp**2 + anew**2*mm**2)
-vkrin = ((B*np.cos(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
-dvkrin = (((-kp**2/B)*np.cos(B*eta)/(np.sqrt(2*kp)))/anew - (B**2*np.sin(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
-vkiin = ((-B*np.sin(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
-dvkiin = ((-B**2*np.cos(B*eta)/(np.sqrt(2*kp)))/anew - (-(kp**2/B)*np.sin(B*eta)/(np.sqrt(2*kp)))/(kp*anew))[NiNe(kp)[1]]
+vkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dvkrin = (((-kp)*np.sin(kp*eta)/(np.sqrt(2*kp)))/anew - (Hinf*np.cos(kp*eta)/(np.sqrt(2*kp))))[NiNe(kp)[1]]
+vkiin = ((-np.sin(kp*eta)/(np.sqrt(2*kp)))/anew)[NiNe(kp)[1]]
+dvkiin = (((-kp)*np.cos(kp*eta)/(np.sqrt(2*kp)))/anew + (Hinf*np.sin(kp*eta)/(np.sqrt(2*kp))))[NiNe(kp)[1]]
 
 ##Interpolating Hinf, epsilon1, epsilon2
 Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
@@ -283,7 +281,7 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$\zeta\'_{k}$')
 ax4.legend()
-#plt.show()
+plt.show()
 
 #Tensor Perturbation eq in efolds
 def tensorperturbeq(N,h,k):
@@ -344,9 +342,10 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$h\'_{k}$')
 ax4.legend()
-#plt.show()
+plt.show()
 
 #Vector Perturbation eq in efolds
+mm = 7e-4
 def vectorperturbeq(N,v,k):
 	a = ai*np.exp(N)
 	vk, vkN = v
@@ -405,7 +404,7 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$v\'_{k}$')
 ax4.legend()
-#plt.show()
+plt.show()
 
 #scalar power spectrum 
 def Ps(kk,aGkr,aGki):
@@ -414,7 +413,8 @@ def Ps(kk,aGkr,aGki):
 	Ps = ((kk**3)/(2*np.pi**2))*((aGkr*aGkr)+(aGki*aGki)) #for a given k
 	return Ps
 
-k = np.logspace(-4, 0, 100)
+#k = np.logspace(-4, 0, 100)
+k = np.logspace(-3, 2, 100)
 finGr = []
 finGi = []
 for i in k:
@@ -446,12 +446,12 @@ for i in k:
 	finhr.append(finhrsol.y[0][-1])
 	finhi.append(finhisol.y[0][-1])
 
-#vector power spectrum 
+#vector power spectrum
 def Pv(kk,avkr,avki):
 	avkr = np.array(avkr)
 	avki = np.array(avki)
-	Pt = ((8*kk**3)/(2*np.pi**2))*((avkr*avkr)+(avki*avki)) #for a given k
-	return Pt
+	Pv = ((4*kk**3)/(2*np.pi**2))*((avkr*avkr)+(avki*avki)) #for a given k
+	return Pv
 
 finvr = []
 finvi = []
@@ -465,7 +465,17 @@ for i in k:
 	finvisol = solve_ivp(vectorperturbeq,[NiNe(i)[2],NiNe(i)[5]],[vkiin,dvkiin],t_eval=NiNe(i)[6],args = (i, ),atol=1e-32)
 	finvr.append(finvrsol.y[0][-1])
 	finvi.append(finvisol.y[0][-1])
-	
+
+#Analytic Vector Power Spectrum
+def PvA(N,kk):
+	a = ai*np.exp(N)
+	kk_aH = kk/(a*Hinf_cubic(N))
+	kaHindex = np.abs(kk_aH - 1).argmin()
+	PvA = ((kk*Hinf_cubic(N[kaHindex]))/(2*np.pi*mm))**2 
+	return PvA
+
+print(PvA(NiNe(i)[6],10))
+
 #Slow roll approximation
 def PSR(N,kk):
 	a = ai*np.exp(N)
@@ -477,6 +487,10 @@ def PSR(N,kk):
 	rk = 16*epsilon1_cubic(N[kaHindex])
 	nsk = 1-2*epsilon1_cubic(N[kaHindex]) - epsilon2_cubic(N[kaHindex])
 	return Psk,Ptk,rk,nsk
+
+pvvA = []
+for i in k:
+	pvvA.append(PvA(NiNe(i)[6],i))
 
 pssr = []
 ptsr = []
@@ -492,18 +506,28 @@ for i in k:
 	nssr.append(PSR(NiNe(i)[6],i)[3])
 
 plt.figure()
+plt.plot(k/kp,Pv(k,finvr,finvi),label="Vector Power spectrum")
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel("$k/kp$ in $Mpc^{-1}$")
+plt.ylabel("${\cal P}_{V}(k)$")
+plt.legend()
+plt.show()
+
+plt.figure()
 plt.plot(k,Ps(k,finGr,finGi),label="Scalar Power spectrum")
 plt.plot(k,Pt(k,finhr,finhi),label="Tensor Power spectrum")
-plt.plot(k,Pt(k,finvr,finvi),label="Vector Power spectrum")
+plt.plot(k,Pv(k,finvr,finvi),label="Vector Power spectrum")
 plt.plot(k,pssr,'g--',label="Scalar Power spectrum (Slow roll approximation)")
 plt.plot(k,ptsr,'m--',label="Tensor Power spectrum (Slow roll approximation)")
+plt.plot(k,pvvA,'k--',label="Vector Power spectrum (Analytic)")
 plt.title("Primordial power spectra")
 plt.xscale('log')
 plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
-plt.ylabel("${\cal P}_{S/T}(k)$")
+plt.ylabel("${\cal P}_{S/T/V}(k)$")
 plt.legend()
-#plt.show()
+plt.show()
 
 percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 
@@ -512,7 +536,7 @@ plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
-#plt.show()
+plt.show()
 
 percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 
@@ -521,7 +545,7 @@ plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
-#plt.show()
+plt.show()
 
 plt.figure()
 plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
@@ -531,7 +555,7 @@ plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("r(k)")
 #plt.ylim([0,0.5])
-#plt.show()
+plt.show()
 
 #spectral tilt [ns = 1+((d ln Ps)/(d ln k))]
 lnPs = np.log(Ps(k,finGr,finGi))
@@ -550,8 +574,8 @@ plt.ylim([0.9,1])
 plt.show()
 
 ####writing values in files
-np.savetxt('Backgroundm2phi2.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
+np.savetxt('Backgroundm2phi2vec.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
 
-np.savetxt('Perturbedm2phi2.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
+np.savetxt('Perturbedm2phi2vec.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
 
-np.savetxt('Powerspectrumm2phi2.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
+np.savetxt('Powerspectrumm2phi2vec.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
