@@ -256,7 +256,7 @@ Gi = Gisol.y[0]
 dGi = Gisol.y[1]
 
 fig = plt.figure()
-plt.title("Mode evolution plot (Scalar) for pivot scale (k = 0.05)")
+plt.title("Mode evolution plot (Scalar) for pivot scale (k = 0.05 $M pc^{-1}$))")
 ax1 = fig.add_subplot(221)
 ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
@@ -317,7 +317,7 @@ hi = hisol.y[0]
 dhi = hisol.y[1]
 
 fig = plt.figure()
-plt.title("Mode evolution plot (Tensor) for pivot scale (k = 0.05)")
+plt.title("Mode evolution plot (Tensor) for pivot scale (k = 0.05 $M pc^{-1}$))")
 ax1 = fig.add_subplot(221)
 ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
@@ -457,6 +457,7 @@ plt.xscale('log')
 plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("r(k)")
+plt.legend()
 #plt.ylim([0,0.5])
 #plt.show()
 
@@ -475,6 +476,7 @@ plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("$n_{s}(k)$")
 #plt.ylim([0.9,1])
+plt.legend()
 plt.show()
 
 ####writing values in files

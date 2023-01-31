@@ -244,7 +244,7 @@ Gi = Gisol.y[0]
 dGi = Gisol.y[1]
 
 fig = plt.figure()
-plt.title("Mode evolution plot (Scalar) for pivot scale (k = 0.05)")
+plt.title("Mode evolution plot (Scalar) for pivot scale (k = 0.05 $M pc^{-1}$))")
 ax1 = fig.add_subplot(221)
 ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
@@ -305,7 +305,7 @@ hi = hisol.y[0]
 dhi = hisol.y[1]
 
 fig = plt.figure()
-plt.title("Mode evolution plot (Tensor) for pivot scale (k = 0.05)")
+plt.title("Mode evolution plot (Tensor) for pivot scale (k = 0.05 $M pc^{-1}$))")
 ax1 = fig.add_subplot(221)
 ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
@@ -419,6 +419,7 @@ percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 plt.figure()
 plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
+plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
 #plt.show()
@@ -428,6 +429,7 @@ percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 plt.figure()
 plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
+plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
 #plt.show()
@@ -439,6 +441,7 @@ plt.title("Tensor to scalar ratio")
 plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("r(k)")
+plt.legend()
 #plt.ylim([0,0.5])
 #plt.show()
 
@@ -456,6 +459,7 @@ plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("$n_{s}(k)$")
 plt.ylim([0.9,1])
+plt.legend()
 plt.show()
 
 ####writing values in files
