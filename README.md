@@ -50,7 +50,7 @@ Files:
   * Solves scalar and tensor perturbation equations for potential for Starobinsky II model. Plots power spectrum, tensor to scalar ratio and spectral index.
 
 16.[tNtau.py](tNtau.py)
-  * Shows relation among cosmic time, conformal time and efolds graphically
+  * Shows relation among cosmic time, conformal time and efolds graphically.
 
 -------------------------------------------------------------------
 
