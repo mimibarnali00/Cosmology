@@ -1,9 +1,11 @@
+#import necessary modules
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
 
+#define function for potential and background equation for inflaton field \phi
 def potential(phi,potparams):
 	v0 = potparams[0]
 	Ap = potparams[1]
@@ -20,7 +22,8 @@ def bgeqn(Phi,N,potparams):
 	v,dvdphi = potential(phi,potparams)
 	d2phidN2 = -(3.-0.5*(dphidN*dphidN))*dphidN-(6.-(dphidN*dphidN))*dvdphi/(2.*v)
 	return dphidN,d2phidN2
-	
+
+#parameter values	
 potparams = np.zeros(5)
 potparams[0] = 5.3e-10 #2.37e-12    #value of v0
 potparams[1] = 1e-1*potparams[0] #3.35e-14     #value of Ap 
@@ -28,43 +31,50 @@ potparams[2] = 1e-2*potparams[0] #7.26e-15    #value of Am
 potparams[3] = 0.707     #value of phi00
 potparams[4] = 2.6e-9     #value of delphi
 
-#Initial condition
+#Initial conditions
 phi0 = np.zeros(2)
 phi0[0] = 2.5e0
 Vini,dV_ini = potential(phi0[0],potparams)
 phi0[1] = -dV_ini/Vini
 
+#Number of efolds 
 N = np.arange(0,71,5e-3)
 
+#finding $\phi$ = phi[:,0] and $d\phi/dN$ = phi[:,1] using "odeint"
 phi = odeint(bgeqn,phi0,N,args = (potparams,))
 V,dV = potential(phi[:,0],potparams)
 Hinf = np.sqrt(V/(3-((phi[:,1])**2)/2))
 Rinfl = 1/Hinf
 
-#Epsilon1
+#\epsilon_1
 epsilon1 = 0.5*phi[:,1]*phi[:,1]
-eps1 = [] #till end of inflation 
+
+plt.figure(figsize=(12,9))
+plt.ylabel(r'$\epsilon_1(N)$')
+plt.xlabel(r'$N$')
+plt.plot(N,epsilon1)
+plt.title("$\epsilon_1$(N) vs N plot")
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Epsilon1.pdf')
+plt.show()
+
+#\epsilon_1 till the end of inflation
+eps1 = []
 for i in epsilon1:
 	eps1.append(i)
 	if i > 1:
 		break
 
-plt.figure()
 infl = np.where(epsilon1 == eps1[-1])[0][0]
-plt.ylabel(r'$\epsilon_1(N)$')
-plt.xlabel(r'$N$')
-plt.plot(N,epsilon1)
-plt.title("$\epsilon_1$(N) vs N plot")
-#plt.show()
 
-#print(epsilon1[infl-1])
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N[0:infl-1],epsilon1[0:infl-1])
 plt.title("$\epsilon_1$(N) vs N plot till the end of Inflation")
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Epsilon1_EoI.pdf')
+plt.show()
 
+##Horizon for radiation, matter and dark energy
 def H(a,Or,Om,Ok,Ol,H0):
 	Hz = H0*((Or/a**4)+(Om/a**3)+(Ok/a**2)+Ol)**0.50e0
 	return Hz
@@ -88,10 +98,12 @@ Hz = np.zeros(len(a))
 Hz = H(a,Or,Om,Ok,Ol,H0)*Const
 RadH = 1/Hz
 
+#physical wavelengths for reference
 lambda1=10**60*a
 lambda2=10**57*a
 lambda3=10**54*a
 
+#Matching the Hubble radius during inflation to that of radiation
 down = []
 for i in lambda1:
 	if i < Rinfl[0]:
@@ -99,7 +111,7 @@ for i in lambda1:
 
 tr = np.where(lambda1 == down[-1])[0][0]
 pr = np.log10(a)[tr]
-extra = -4.43
+extra = -4.43 #adding some value to alomst exactly match the Hubble radius during inflation to that of radiation for visualization purposes.
 aN = N*0.4343+pr+extra
 
 down1 = []
@@ -110,7 +122,7 @@ for i in RadH:
 tr1 = np.where(RadH == down1[-1])[0][0]
 pr1 = np.log10(a)[tr1]
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.xlim([-60,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
@@ -124,9 +136,10 @@ plt.axvline(np.log10(1/1101), 0, 1, label='CMB',color='red')
 plt.axvline(pr1, 0, 1, label='End of Inflation',color='violet')
 plt.title('Physical lengthscales')
 plt.legend()
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_HubbleRadius_Physical.pdf')
+plt.show()
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.xlim([-60,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
@@ -140,10 +153,11 @@ plt.axvline(np.log10(1/1101), 0, 1, label='CMB',color='red')
 plt.axvline(pr1, 0, 1, label='End of Inflation',color='violet')
 plt.title('Comoving lengthscales')
 plt.legend()
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_HubbleRadius_Comoving.pdf')
+plt.show()
 
 ##Perturbation equation
-#epsilon2
+#\epsilon_2
 deps2dN = []
 for i in range(np.size(N)-1):
 	ans = ((epsilon1[i+1]-epsilon1[i])/(N[i+1]-N[i]))
@@ -151,7 +165,7 @@ for i in range(np.size(N)-1):
 
 epsilon2 = np.divide(deps2dN,epsilon1[1:])
 
-#Making size of epsilon1 = size of epsilon2 by adding a 0 as first element
+#Making size of \epsilon_1 = size of \epsilon_2 by adding a 0 as first element
 zer = np.zeros(np.size(epsilon2)+1)
 zer[1:] = epsilon2
 epsilon2 = zer
@@ -167,7 +181,14 @@ for i in N:
 ind1 = np.where(N == ex[-1])[0][0]
 #print(ind1,N[ind1])
 ai = kp/(np.exp(N[ind1])*Hinf[ind1]) #Mpc^-1/Mpl
-print("ai = ",ai)
+
+#redefining quantities such that their last value corresponds to end of inflation (for numerical efficiency)
+N = N[0:infl-1]
+Hinf = Hinf[0:infl-1]
+epsilon1 = epsilon1[0:infl-1]
+epsilon2 = epsilon2[0:infl-1]
+V = V[0:infl-1]
+dV = dV[0:infl-1]
 
 anew = ai*np.exp(N)
 
@@ -183,17 +204,19 @@ def NiNe(kkp):
 	Ne = N[k_aHenind]
 	
 	efolds = np.arange(Ni, Ne, 0.0001)
+	if np.amax(efolds) > Ne:
+		Ne = N[-1]
+	
+	efolds = np.arange(Ni, Ne, 0.0001)[:-1]
 	return k_aHin,k_aHinind,Ni,k_aHen,k_aHenind,Ne,efolds
 
-print("k_aHin = ",NiNe(kp)[0])
-print("Ni = ",NiNe(kp)[2])
-print("k_aHen = ",NiNe(kp)[3])
-print("Ne = ",NiNe(kp)[5])
-
-#############
+#defining conformal time (\eta), z, dz/d\eta
 eta = -1/(anew*Hinf)[NiNe(kp)[1]]
-z = anew*np.sqrt(2*epsilon1)
-dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
+#z = anew*np.sqrt(2*epsilon1)
+#dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
+d2phi=-(3.-0.5*(phi[0:infl-1,1]*phi[0:infl-1,1]))*phi[0:infl-1,1]-(6.-(phi[0:infl-1,1]*phi[0:infl-1,1]))*dV/(2.*V)
+z = anew*phi[0:infl-1,1]
+dz = anew*(phi[0:infl-1,1]+d2phi)
 
 ##initial conditions for scalars
 Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[NiNe(kp)[1]]
@@ -224,7 +247,7 @@ Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
 epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
 epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
 
-#Perturbation eq in efolds
+#Scalar Perturbation eq in efolds
 #G = psi + delphi/dphidN
 def scalarperturbeq(N,G,k):
 	a = ai*np.exp(N)
@@ -232,32 +255,30 @@ def scalarperturbeq(N,G,k):
 	GkNN = - (3.0 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - ((k/(a*Hinf_cubic(N)))**2)*Gk
 	return GkN,GkNN
 
+#solving for real part
 Nrfin = []
-Nifin = []
 Gr = []
 dGr = []
-Gi = []
-dGi = []
 
 Grsol = solve_ivp(scalarperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[Gkrin,dGkrin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(Grsol)
+
 Nrfin = Grsol.t
 Gr = Grsol.y[0]
 dGr = Grsol.y[1]
 
-#############################################
+#solving for imaginary part
+Nifin = []
+Gi = []
+dGi = []
+
 Gisol = solve_ivp(scalarperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[Gkiin,dGkiin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(Gisol)
+
 Nifin = Gisol.t
 Gi = Gisol.y[0]
 dGi = Gisol.y[1]
 
-fig = plt.figure()
-plt.title("Mode evolution plot (Scalar) for pivot scale (k = 0.05 $M pc^{-1}$))")
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2,figsize=(12,9))
+fig.suptitle("Mode evolution plot (Scalar) for pivot scale (k = 0.05 $M pc^{-1}$))")
 
 ax1.plot(Nrfin,Gr,label = "Real")
 ax1.plot(Nifin,Gi,label = "Imaginary")
@@ -284,7 +305,8 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$\zeta\'_{k}$')
 ax4.legend()
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Scalarperturbation.pdf')
+plt.show()
 
 #Tensor Perturbation eq in efolds
 def tensorperturbeq(N,h,k):
@@ -293,32 +315,30 @@ def tensorperturbeq(N,h,k):
 	hkNN = - (3.0 - epsilon1_cubic(N))*hkN - ((k/(a*Hinf_cubic(N)))**2)*hk
 	return hkN,hkNN
 
+#solving for real part
 Nhrfin = []
-Nhifin = []
 hr = []
 dhr = []
-hi = []
-dhi = []
 
 hrsol = solve_ivp(tensorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[hkrin,dhkrin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(hrsol)
+
 Nhrfin = hrsol.t
 hr = hrsol.y[0]
 dhr = hrsol.y[1]
 
-#############################################
+#solving for imaginary part
+Nhifin = []
+hi = []
+dhi = []
+
 hisol = solve_ivp(tensorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[hkiin,dhkiin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(hisol)
+
 Nhifin = hisol.t
 hi = hisol.y[0]
 dhi = hisol.y[1]
 
-fig = plt.figure()
-plt.title("Mode evolution plot (Tensor) for pivot scale (k = 0.05 $M pc^{-1}$))")
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2,figsize=(12,9))
+fig.suptitle("Mode evolution plot (Tensor) for pivot scale (k = 0.05 $M pc^{-1}$))")
 
 ax1.plot(Nhrfin,hr,label = "Real")
 ax1.plot(Nhifin,hi,label = "Imaginary")
@@ -345,7 +365,8 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$h\'_{k}$')
 ax4.legend()
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Tensorperturbation.pdf')
+plt.show()
 
 #scalar power spectrum 
 def Ps(kk,aGkr,aGki):
@@ -401,8 +422,7 @@ def PsstaroII(kk):
 	k0 = ai*np.exp(N00)*Hinf_cubic(N00)
 	PsII = As*(1-(3*delA/Ap)*(k0/kk)*((1-(k0**2/kk**2))*np.sin(2*kk/k0) + (2*k0/kk)*np.cos(2*kk/k0)) + ((9*delA**2)/(2*Ap**2))*(k0**2/kk**2)*(1+(k0**2/kk**2))*(1+(k0**2/kk**2)-(2*k0/kk)*np.sin(2*kk/k0) + (1-(k0**2/kk**2))*np.cos(2*kk/k0)))
 	return PsII
-	
-	
+
 #Slow roll approximation
 def PSR(N,kk):
 	a = ai*np.exp(N)
@@ -428,7 +448,7 @@ for i in k:
 for i in k:
 	nssr.append(PSR(NiNe(i)[6],i)[3])
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k,Ps(k,finGr,finGi),label="Scalar Power spectrum")
 plt.plot(k,Pt(k,finhr,finhi),label="Tensor Power spectrum")
 plt.plot(k,pssr,'g--',label="Scalar Power spectrum (Slow roll approximation)")
@@ -440,29 +460,32 @@ plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("${\cal P}_{S/T}(k)$")
 plt.legend()
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Powerspectra.pdf')
+plt.show()
 
 percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
 plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Scalarpowerspectrumerror.pdf')
+plt.show()
 
 percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
 plt.xscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Tensorpowerspectrumerror.pdf')
+plt.show()
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
 plt.plot(k,rsr,'g--',label="Slow roll approximation")
 plt.title("Tensor to scalar ratio")
@@ -472,7 +495,8 @@ plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("r(k)")
 plt.legend()
 #plt.ylim([0,0.5])
-#plt.show()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Tensortoscalarratio.pdf')
+plt.show()
 
 #spectral tilt [ns = 1+((d ln Ps)/(d ln k))]
 lnPs = np.log(Ps(k,finGr,finGi))
@@ -480,7 +504,7 @@ lnk = np.log(k)
 dlnk = lnk[1]-lnk[0]
 ns = 1+np.gradient(lnPs,dlnk)
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k[0:-1],ns[0:-1])
 plt.plot(k[0:-1],nssr[0:-1],'g--',label="Slow roll approximation")
 plt.title("Spectral index")
@@ -489,11 +513,12 @@ plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("$n_{s}(k)$")
 #plt.ylim([0.9,1])
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/model_staroII_Spectralindex.pdf')
 plt.show()
 
-####writing values in files
-np.savetxt('BackgroundstaroII.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
+#writing values in files (change the file destination accordingly)
+np.savetxt('/home/barnali/Documents/GitHub/Cosmology/files/BackgroundstaroII.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
 
-np.savetxt('PerturbedstaroII.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
+np.savetxt('/home/barnali/Documents/GitHub/Cosmology/files/PerturbedstaroII.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
 
-np.savetxt('PowerspectrumstaroII.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
+np.savetxt('/home/barnali/Documents/GitHub/Cosmology/files/PowerspectrumstaroII.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
