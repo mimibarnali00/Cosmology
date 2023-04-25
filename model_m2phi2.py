@@ -19,7 +19,7 @@ def bgeqn(Phi,N,potparams):
 	d2phidN2 = -(3.-0.5*(dphidN*dphidN))*dphidN-(6.-(dphidN*dphidN))*dvdphi/(2.*v)
 	return dphidN,d2phidN2
 
-#parameter values	
+#parameter values
 potparams = 7e-6
 
 #Initial conditions

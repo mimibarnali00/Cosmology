@@ -1,3 +1,4 @@
+#import necessary modules
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
@@ -67,11 +68,13 @@ for i in range(val-1):
 	y = 1/a[1:i+2]
 	tau.append(integrate.simpson(y, x))
 
+plt.figure(figsize=(12,9))
 plt.plot(Ages[1:],tau)
 plt.ylabel("Conformal time (in Gigayears)")
 plt.xlabel("t (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in Conformal time with t')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/tNtau_tau_vs_t.pdf')
 plt.show()
 
 ##efolds
@@ -88,13 +91,16 @@ for i in range(val-1):
 	y = H[0:i+1]
 	N.append(integrate.simpson(y, x))
 
+plt.figure(figsize=(12,9))
 plt.plot(Ages[1:],N)
 plt.ylabel("efold")
 plt.xlabel("t (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in efold with t')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/tNtau_N_vs_t.pdf')
 plt.show()
 
+plt.figure(figsize=(12,9))
 plt.plot(Ages[1:],tau,label = "Conformal time")
 plt.plot(Ages[1:],N,label = "efold")
 plt.ylabel("efold/N")
@@ -102,11 +108,14 @@ plt.xlabel("t (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in efold and Conformal time with t')
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/tNtau_tauN_vs_t.pdf')
 plt.show()
 
+plt.figure(figsize=(12,9))
 plt.plot(N,tau)
 plt.yscale('log')
 plt.ylabel("COnformal time")
 plt.xlabel("N")
 plt.title('Change in COnformal time with efold')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/tNtau_tau_vs_N.pdf')
 plt.show()

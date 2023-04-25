@@ -1,9 +1,11 @@
+#import necessary modules
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
 
+#define function for potential and background equation for inflaton field \phi
 def potential(phi,potparams):
 	mass = potparams
 	v = 0.5*(mass**2)*phi*phi
@@ -16,46 +18,52 @@ def bgeqn(Phi,N,potparams):
 	v,dvdphi = potential(phi,potparams)
 	d2phidN2 = -(3.-0.5*(dphidN*dphidN))*dphidN-(6.-(dphidN*dphidN))*dvdphi/(2.*v)
 	return dphidN,d2phidN2
-	
+
+#parameter values
 potparams = 7e-6
 
-#Initial condition
+#Initial conditions
 phi0 = np.zeros(2)
 phi0[0] = 16.5
 Vini,dV_ini = potential(phi0[0],potparams)
 phi0[1] = -dV_ini/Vini
 
+#Number of efolds 
 N = np.arange(0,71,5e-3)
 
+#finding $\phi$ = phi[:,0] and $d\phi/dN$ = phi[:,1] using "odeint"
 phi = odeint(bgeqn,phi0,N,args = (potparams,))
 V,dV = potential(phi[:,0],potparams)
 Hinf = np.sqrt(V/(3-((phi[:,1])**2)/2))
 Rinfl = 1/Hinf
 
-#Epsilon1
+#\epsilon_1
 epsilon1 = 0.5*phi[:,1]*phi[:,1]
-eps1 = [] #till end of inflation 
-for i in epsilon1:
-	eps1.append(i)
-	if i > 1:
-		break
 
-infl = np.where(epsilon1 == eps1[-1])[0][0]
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N,epsilon1)
 plt.title("$\epsilon_1$(N) vs N plot")
 plt.show()
 
-#print(epsilon1[infl-1])
-plt.figure()
+#\epsilon_1 till the end of inflation
+eps1 = []
+for i in epsilon1:
+	eps1.append(i)
+	if i > 1:
+		break
+
+infl = np.where(epsilon1 == eps1[-1])[0][0]
+
+plt.figure(figsize=(12,9))
 plt.ylabel(r'$\epsilon_1(N)$')
 plt.xlabel(r'$N$')
 plt.plot(N[0:infl-1],epsilon1[0:infl-1])
 plt.title("$\epsilon_1$(N) vs N plot till the end of Inflation")
 plt.show()
 
+##Horizon for radiation, matter and dark energy
 def H(a,Or,Om,Ok,Ol,H0):
 	Hz = H0*((Or/a**4)+(Om/a**3)+(Ok/a**2)+Ol)**0.50e0
 	return Hz
@@ -79,10 +87,12 @@ Hz = np.zeros(len(a))
 Hz = H(a,Or,Om,Ok,Ol,H0)*Const
 RadH = 1/Hz
 
+#physical wavelengths for reference
 lambda1=10**60*a
 lambda2=10**57*a
 lambda3=10**54*a
 
+#Matching the Hubble radius during inflation to that of radiation
 down = []
 for i in lambda1:
 	if i < Rinfl[0]:
@@ -90,7 +100,7 @@ for i in lambda1:
 
 tr = np.where(lambda1 == down[-1])[0][0]
 pr = np.log10(a)[tr]
-extra = -2.75
+extra = -2.75 #adding some value to alomst exactly match the Hubble radius during inflation to that of radiation for visualization purposes.
 aN = N*0.4343+pr+extra
 
 down1 = []
@@ -101,7 +111,7 @@ for i in RadH:
 tr1 = np.where(RadH == down1[-1])[0][0]
 pr1 = np.log10(a)[tr1]
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.xlim([-60,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
@@ -117,7 +127,7 @@ plt.title('Physical lengthscales')
 plt.legend()
 plt.show()
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.xlim([-60,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
@@ -134,7 +144,7 @@ plt.legend()
 plt.show()
 
 ##Perturbation equation
-#epsilon2
+#\epsilon_2
 deps2dN = []
 for i in range(np.size(N)-1):
 	ans = ((epsilon1[i+1]-epsilon1[i])/(N[i+1]-N[i]))
@@ -142,7 +152,7 @@ for i in range(np.size(N)-1):
 
 epsilon2 = np.divide(deps2dN,epsilon1[1:])
 
-#Making size of epsilon1 = size of epsilon2 by adding a 0 as first element
+#Making size of \epsilon_1 = size of \epsilon_2 by adding a 0 as first element
 zer = np.zeros(np.size(epsilon2)+1)
 zer[1:] = epsilon2
 epsilon2 = zer
@@ -156,9 +166,16 @@ for i in N:
 		ex.append(i)
 
 ind1 = np.where(N == ex[-1])[0][0]
-#print(ind1,N[ind1])
+
 ai = kp/(np.exp(N[ind1])*Hinf[ind1]) #Mpc^-1/Mpl
-print("ai = ",ai)
+
+#redefining quantities such that their last value corresponds to end of inflation (for numerical efficiency)
+N = N[0:infl-1]
+Hinf = Hinf[0:infl-1]
+epsilon1 = epsilon1[0:infl-1]
+epsilon2 = epsilon2[0:infl-1]
+V = V[0:infl-1]
+dV = dV[0:infl-1]
 
 anew = ai*np.exp(N)
 
@@ -174,17 +191,19 @@ def NiNe(kkp):
 	Ne = N[k_aHenind]
 	
 	efolds = np.arange(Ni, Ne, 0.0001)
+	if np.amax(efolds) > Ne:
+		Ne = N[-1]
+	
+	efolds = np.arange(Ni, Ne, 0.0001)[:-1]
 	return k_aHin,k_aHinind,Ni,k_aHen,k_aHenind,Ne,efolds
 
-print("k_aHin = ",NiNe(kp)[0])
-print("Ni = ",NiNe(kp)[2])
-print("k_aHen = ",NiNe(kp)[3])
-print("Ne = ",NiNe(kp)[5])
-
-#############
+#defining conformal time (\eta), z, dz/d\eta
 eta = -1/(anew*Hinf)[NiNe(kp)[1]]
-z = anew*np.sqrt(2*epsilon1)
-dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
+#z = anew*np.sqrt(2*epsilon1)
+#dz = anew*Hinf*(anew*np.sqrt(2*epsilon1) + (epsilon1*epsilon2)/(np.sqrt(2*epsilon1)))
+d2phi=-(3.-0.5*(phi[0:infl-1,1]*phi[0:infl-1,1]))*phi[0:infl-1,1]-(6.-(phi[0:infl-1,1]*phi[0:infl-1,1]))*dV/(2.*V)
+z = anew*phi[0:infl-1,1]
+dz = anew*(phi[0:infl-1,1]+d2phi)
 
 ##initial conditions for scalars
 Gkrin = ((np.cos(kp*eta)/(np.sqrt(2*kp)))/z)[NiNe(kp)[1]]
@@ -221,7 +240,7 @@ Hinf_cubic   = interp1d(N, Hinf, kind='cubic')
 epsilon1_cubic   = interp1d(N, epsilon1, kind='cubic')
 epsilon2_cubic   = interp1d(N, epsilon2, kind='cubic')
 
-#Perturbation eq in efolds
+#Scalar Perturbation eq in efolds
 #G = psi + delphi/dphidN
 def scalarperturbeq(N,G,k):
 	a = ai*np.exp(N)
@@ -229,32 +248,30 @@ def scalarperturbeq(N,G,k):
 	GkNN = - (3.0 - epsilon1_cubic(N) + epsilon2_cubic(N))*GkN - ((k/(a*Hinf_cubic(N)))**2)*Gk
 	return GkN,GkNN
 
+#solving for real part
 Nrfin = []
-Nifin = []
 Gr = []
 dGr = []
-Gi = []
-dGi = []
 
 Grsol = solve_ivp(scalarperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[Gkrin,dGkrin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(Grsol)
+
 Nrfin = Grsol.t
 Gr = Grsol.y[0]
 dGr = Grsol.y[1]
 
-#############################################
+#solving for imaginary part
+Nifin = []
+Gi = []
+dGi = []
+
 Gisol = solve_ivp(scalarperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[Gkiin,dGkiin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(Gisol)
+
 Nifin = Gisol.t
 Gi = Gisol.y[0]
 dGi = Gisol.y[1]
 
-fig = plt.figure()
-plt.title("Mode evolution plot (Scalar) for pivot scale (k = 0.05)")
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2,figsize=(12,9))
+fig.suptitle("Mode evolution plot (Scalar) for pivot scale (k = 0.05 $M pc^{-1}$))")
 
 ax1.plot(Nrfin,Gr,label = "Real")
 ax1.plot(Nifin,Gi,label = "Imaginary")
@@ -290,32 +307,30 @@ def tensorperturbeq(N,h,k):
 	hkNN = - (3.0 - epsilon1_cubic(N))*hkN - ((k/(a*Hinf_cubic(N)))**2)*hk
 	return hkN,hkNN
 
+#solving for real part
 Nhrfin = []
-Nhifin = []
 hr = []
 dhr = []
-hi = []
-dhi = []
 
 hrsol = solve_ivp(tensorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[hkrin,dhkrin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(hrsol)
+
 Nhrfin = hrsol.t
 hr = hrsol.y[0]
 dhr = hrsol.y[1]
 
-#############################################
+#solving for imaginary part
+Nhifin = []
+hi = []
+dhi = []
+
 hisol = solve_ivp(tensorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[hkiin,dhkiin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(hisol)
+
 Nhifin = hisol.t
 hi = hisol.y[0]
 dhi = hisol.y[1]
 
-fig = plt.figure()
-plt.title("Mode evolution plot (Tensor) for pivot scale (k = 0.05)")
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2,figsize=(12,9))
+fig.suptitle("Mode evolution plot (Tensor) for pivot scale (k = 0.05 $M pc^{-1}$))")
 
 ax1.plot(Nhrfin,hr,label = "Real")
 ax1.plot(Nhifin,hi,label = "Imaginary")
@@ -352,32 +367,30 @@ def vectorperturbeq(N,v,k):
 	vkNN = - (1.0 - epsilon1_cubic(N) + 2*(k**2)/(a**2*mm**2 + k**2))*vkN - ((a**2*mm**2 + k**2)/(a*Hinf_cubic(N))**2)*vk
 	return vkN,vkNN
 
+#solving for real part
 Nvrfin = []
-Nvifin = []
 vr = []
 dvr = []
-vi = []
-dvi = []
 
 vrsol = solve_ivp(vectorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[vkrin,dvkrin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(vrsol)
+
 Nvrfin = vrsol.t
 vr = vrsol.y[0]
 dvr = vrsol.y[1]
 
-#############################################
+#solving for imaginary part
+Nvifin = []
+vi = []
+dvi = []
+
 visol = solve_ivp(vectorperturbeq,[NiNe(kp)[2],NiNe(kp)[5]],[vkiin,dvkiin],t_eval=NiNe(kp)[6],args = (kp, ),atol=1e-32) #default RK45
-#print(visol)
+
 Nvifin = visol.t
 vi = visol.y[0]
 dvi = visol.y[1]
 
-fig = plt.figure()
-plt.title("Mode evolution plot (Vector) for pivot scale (k = 0.05)")
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2,figsize=(12,9))
+fig.suptitle("Mode evolution plot (Vector) for pivot scale (k = 0.05 $M pc^{-1}$))")
 
 ax1.plot(Nvrfin,vr,label = "Real")
 ax1.plot(Nvifin,vi,label = "Imaginary")
@@ -404,6 +417,7 @@ ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$v\'_{k}$')
 ax4.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Vectorperturbation.pdf')
 plt.show()
 
 #scalar power spectrum 
@@ -505,16 +519,17 @@ for i in k:
 for i in k:
 	nssr.append(PSR(NiNe(i)[6],i)[3])
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k/kp,Pv(k,finvr,finvi),label="Vector Power spectrum")
 plt.xscale('log')
 plt.yscale('log')
 plt.xlabel("$k/kp$ in $Mpc^{-1}$")
 plt.ylabel("${\cal P}_{V}(k)$")
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_VectorPowerspectrum.pdf')
 plt.show()
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k,Ps(k,finGr,finGi),label="Scalar Power spectrum")
 plt.plot(k,Pt(k,finhr,finhi),label="Tensor Power spectrum")
 plt.plot(k,Pv(k,finvr,finvi),label="Vector Power spectrum")
@@ -527,11 +542,12 @@ plt.yscale('log')
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("${\cal P}_{S/T/V}(k)$")
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Powerspectra.pdf')
 plt.show()
 
 percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
 plt.xlabel("$k$ in $Mpc^{-1}$")
@@ -540,14 +556,14 @@ plt.show()
 
 percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
 plt.xlabel("$k$ in $Mpc^{-1}$")
 plt.ylabel("% error")
 plt.show()
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
 plt.plot(k,rsr,'g--',label="Slow roll approximation")
 plt.title("Tensor to scalar ratio")
@@ -563,7 +579,7 @@ lnk = np.log(k)
 dlnk = lnk[1]-lnk[0]
 ns = 1+np.gradient(lnPs,dlnk)
 
-plt.figure()
+plt.figure(figsize=(12,9))
 plt.plot(k[0:-1],ns[0:-1])
 plt.plot(k[0:-1],nssr[0:-1],'g--',label="Slow roll approximation")
 plt.title("Spectral index")
@@ -573,9 +589,9 @@ plt.ylabel("$n_{s}(k)$")
 plt.ylim([0.9,1])
 plt.show()
 
-####writing values in files
-np.savetxt('Backgroundm2phi2vec.txt', np.array([N, phi[:,0], epsilon1, V, Hinf, z, dz, phi[:,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
+#writing values in files (change the file destination accordingly)
+np.savetxt('/home/barnali/Documents/GitHub/Cosmology/files/Backgroundm2phi2vec.txt', np.array([N, phi[0:infl-1,0], epsilon1, V, Hinf, z, dz, phi[0:infl-1,1], epsilon2]).T, delimiter='\t', fmt="%s",header='N    phi    eps1    V    H    z    zN    phiN    eps2')
 
-np.savetxt('Perturbedm2phi2vec.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN')
+np.savetxt('/home/barnali/Documents/GitHub/Cosmology/files/Perturbedm2phi2vec.txt', np.array([NiNe(kp)[6], Gr, Gi, dGr, dGi, hr, hi, dhr, dhi, vr, vi, dvr, dvi]).T, delimiter='\t', fmt="%s",header='N    realG    imgG    realGN    imgGN    realh    imgh    realhN    imghN    realv    imgv    realvN    imgvN')
 
-np.savetxt('Powerspectrumm2phi2vec.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    r    ns')
+np.savetxt('/home/barnali/Documents/GitHub/Cosmology/files/Powerspectrumm2phi2vec.txt', np.array([k, Ps(k,finGr,finGi), Pt(k,finhr,finhi),Pv(k,finvr,finvi), Pt(k,finhr,finhi)/Ps(k,finGr,finGi), ns]).T, delimiter='\t', fmt="%s",header='k    Ps    Pt    Pv    r    ns')

@@ -1,3 +1,4 @@
+#import necessary modules
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
@@ -11,13 +12,16 @@ Or=2.47e-5/(67.36/100.0)**2
 Om=0.3153
 Ok = 0.0e0
 Ol=1-Or-Om-Ok
-H0=67.36
+H0=67.36 #(km/s)/Mpc
 
 a = np.linspace(0, 1, 1000)
+
+plt.figure(figsize=(12,9))
 plt.plot(a,dtLCDM(a,Or,Om,Ok,Ol,H0))
 plt.xlabel("a(scale factor)")
 plt.ylabel("dt/da(a)")
 plt.title('Change in scale factor with time')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/AgeofUniv_a_vs_t.pdf')
 plt.show()
 
 def integrand(x):
@@ -61,9 +65,11 @@ if (Presentage - down[-1]) < (Presentage - up[0]):
 else:
 	Present.append(up[0])
 
+plt.figure(figsize=(12,9))
 plt.plot(Ages,a)
 plt.ylabel("a")
 plt.xlabel("Age (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in a with Age')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/AgeofUniv_a_vs_age.pdf')
 plt.show()

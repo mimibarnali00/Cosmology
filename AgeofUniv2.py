@@ -1,3 +1,4 @@
+#import necessary modules
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
@@ -45,9 +46,11 @@ for i in ok:
 	x = sy.Integral(integrand(x),(x,0,1))
 	Age = x.evalf()*C
 	Ages.append(Age)
-	
+
+plt.figure(figsize=(12,9))
 plt.plot(ok,Ages)
-plt.xlabel("Curvature (Omega_k)")
+plt.xlabel("Curvature ($\Omega_{k}$)")
 plt.ylabel("Age (in Gigayears)")
 plt.title('Change in Age with Curvature')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/AgeofUniv2_age_vs_Omega_k.pdf')
 plt.show()

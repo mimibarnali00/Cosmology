@@ -1,3 +1,4 @@
+#import necessary modules
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
@@ -47,7 +48,7 @@ x = sy.Integral(integrand(x),(x,0,1))
 Age = x.evalf()*C
 
 Ages = []
-val = 100
+val = 10
 a = np.linspace(0, 2, val)
 for i in a:
 	x = sy.Symbol("x")
@@ -96,6 +97,7 @@ tauz = np.zeros(np.size(tau)+1)
 tauz[1:] = tau
 tau = tauz
 
+plt.figure(figsize=(12,9))
 plt.plot(Ages,tau)
 plt.ylabel("Conformal time (in Gigayears)")
 plt.xlabel("t (in Gigayears)")
@@ -103,6 +105,7 @@ plt.axvline(Present, 0, 1, label='Present',color='green')
 plt.axvline(CMBa, 0, 1, label='CMB',color='red')
 plt.title('Change in Conformal time with t')
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/horizonproblem_tau_vs_t.pdf')
 plt.show()
 
 #plt.plot(a,Ages)
@@ -126,6 +129,7 @@ for i in range(np.size(tau)):
 print("tau_p - tau_cmb = ",tau0-taucmb)
 print("tau_cmb - tau_begin = ",taucmb-tau[0])
 
+plt.figure(figsize=(12,9))
 plt.plot(Xpos,tau)
 plt.plot(Xneg,tau)
 #plt.grid()
@@ -136,6 +140,7 @@ plt.axhline(taucmb, 0, 1, label='CMB',color='red')
 #plt.axhline(y=0, color='black')
 plt.axvline(x=0, color='black')
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/horizonproblem.pdf')
 plt.show()
 
 print("tau_begining where tau_p - tau_cmb = tau_cmb - tau_begin is ",(2*taucmb) - tau0)
@@ -153,13 +158,25 @@ Xnewneg = np.zeros(np.size(Xneg)+1)
 Xnewneg[1:] = Xneg
 Xnewneg[0] = taunew_begin - tau0
 
-plt.plot(Xnewpos,taunew)
-plt.plot(Xnewneg,taunew)
+Xnewposcmb = np.zeros(2)
+Xnewposcmb[0] = 0
+Xnewposcmb[1] = Xpos[0]
+
+Xnewnegcmb = np.zeros(2)
+Xnewnegcmb[0] = 0
+Xnewnegcmb[1] = Xneg[0]
+
+plt.figure(figsize=(12,9))
+plt.plot(Xnewpos,taunew,color='blue')
+plt.plot(Xnewneg,taunew,color='orange')
+plt.plot(Xnewposcmb,taunew[0:2],color='blue')
+plt.plot(Xnewnegcmb,taunew[0:2],color='orange')
 plt.ylabel("$tau$ (in Gigayears)")
 plt.xlabel("X")
 plt.axhline(tau0, 0, 1, label='Present',color='green')
 plt.axhline(taucmb, 0, 1, label='CMB',color='red')
 plt.axvline(x=0, color='black')
 plt.legend()
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/horizonproblem_inflation.pdf')
 plt.show()
 
