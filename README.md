@@ -40,19 +40,25 @@ Files:
 12.[KGstaroII.py](KGstaroII.py)
   * Solves Klein Gordon equation for potential for another model due to Starobinsky (or Starobinsky II model).
 
-13.[model_m2phi2.py](model_m2phi2.py)
+13.[KGKKLTbump.py](KGKKLTbump.py)
+  * Solves Klein Gordon equation for KKLT potential with an added Gaussian bump.
+
+14.[model_m2phi2.py](model_m2phi2.py)
   * Solves scalar and tensor perturbation equations for $m^2\phi^2$ potential. Plots power spectrum, tensor to scalar ratio and spectral index.
 
-14.[model_PI.py](model_PI.py)
+15.[model_PI.py](model_PI.py)
   * Solves scalar and tensor perturbation equations for potential for Punctuated Inflaton model. Plots power spectrum, tensor to scalar ratio and spectral index.
 
-15.[model_staroI.py](model_staroI.py)
+16.[model_staroI.py](model_staroI.py)
   * Solves scalar and tensor perturbation equations for potential for Starobinsky I model. Plots power spectrum, tensor to scalar ratio and spectral index.
 
-16.[model_staroII.py](model_staroII.py)
+17.[model_staroII.py](model_staroII.py)
   * Solves scalar and tensor perturbation equations for potential for Starobinsky II model. Plots power spectrum, tensor to scalar ratio and spectral index.
 
-17.[vector_model_m2phi2.py](vector_model_m2phi2.py)
+18.[model_KKLTbump.py](model_KKLTbump.py)
+  * Solves scalar and tensor perturbation equations for KKLT potential with an added Gaussian bump. Plots power spectrum, tensor to scalar ratio and spectral index.
+
+19.[vector_model_m2phi2.py](vector_model_m2phi2.py)
   * Solves vector perturbation equation for $m^2\phi^2$ potential. Plots power spectrum, tensor to scalar ratio and spectral index.
 -------------------------------------------------------------------
 

@@ -1,8 +1,27 @@
-#import necessary modules
+#import libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sy
 from scipy import integrate
+from matplotlib import rc, rcParams
+
+######################################################################
+rc('font', family='TimesRoman', weight = 'extra bold', size = 20.0)
+rc('text', usetex=True)
+rc('axes', linewidth = 2, labelsize = 'Large')  
+rc('xtick', labelsize= 'large')
+rcParams['xtick.major.size'] = 8.0 
+rcParams['xtick.minor.size'] = 4.0
+rcParams['xtick.major.pad'] = 8.0 
+rcParams['xtick.minor.pad'] = 8.0
+rc('ytick', labelsize= 'large')  
+rcParams['ytick.major.size'] = 8.0 
+rcParams['ytick.minor.size'] = 0.0
+rcParams['ytick.major.pad'] = 3.0 
+rcParams['ytick.minor.pad'] = 8.0
+rc('lines', linewidth = 2, markeredgewidth=1.5)
+rc('savefig', dpi=300)
+######################################################################
 
 def dtLCDM(a,Or,Om,Ok,Ol,H0):
 	dadt = H0*a*((Or/a**4)+(Om/a**3)+(Ok/a**2)+Ol)**0.50e0
@@ -70,7 +89,7 @@ for i in range(val-1):
 
 plt.figure(figsize=(12,9))
 plt.plot(Ages[1:],tau)
-plt.ylabel("Conformal time (in Gigayears)")
+plt.ylabel("$\\tau$")
 plt.xlabel("t (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in Conformal time with t')
@@ -93,7 +112,7 @@ for i in range(val-1):
 
 plt.figure(figsize=(12,9))
 plt.plot(Ages[1:],N)
-plt.ylabel("efold")
+plt.ylabel("N")
 plt.xlabel("t (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in efold with t')
@@ -103,7 +122,7 @@ plt.show()
 plt.figure(figsize=(12,9))
 plt.plot(Ages[1:],tau,label = "Conformal time")
 plt.plot(Ages[1:],N,label = "efold")
-plt.ylabel("efold/N")
+plt.ylabel("N,$\\tau$")
 plt.xlabel("t (in Gigayears)")
 plt.axvline(Present, 0, 1, label='Present',color='red')
 plt.title('Change in efold and Conformal time with t')
@@ -114,8 +133,8 @@ plt.show()
 plt.figure(figsize=(12,9))
 plt.plot(N,tau)
 plt.yscale('log')
-plt.ylabel("COnformal time")
+plt.ylabel("$\\tau$")
 plt.xlabel("N")
-plt.title('Change in COnformal time with efold')
+plt.title('Change in Conformal time with efold')
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/tNtau_tau_vs_N.pdf')
 plt.show()

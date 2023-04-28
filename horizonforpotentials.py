@@ -1,6 +1,26 @@
+#import libraries
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+from matplotlib import rc, rcParams
+
+######################################################################
+rc('font', family='TimesRoman', weight = 'extra bold', size = 20.0)
+rc('text', usetex=True)
+rc('axes', linewidth = 2, labelsize = 'Large')  
+rc('xtick', labelsize= 'large')
+rcParams['xtick.major.size'] = 8.0 
+rcParams['xtick.minor.size'] = 4.0
+rcParams['xtick.major.pad'] = 8.0 
+rcParams['xtick.minor.pad'] = 8.0
+rc('ytick', labelsize= 'large')  
+rcParams['ytick.major.size'] = 8.0 
+rcParams['ytick.minor.size'] = 0.0
+rcParams['ytick.major.pad'] = 3.0 
+rcParams['ytick.minor.pad'] = 8.0
+rc('lines', linewidth = 2, markeredgewidth=1.5)
+rc('savefig', dpi=300)
+######################################################################
 
 def potential(phi,potparams):
 #	for m2phi2 potential

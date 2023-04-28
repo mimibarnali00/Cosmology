@@ -1,9 +1,28 @@
-#import necessary modules
+#import libraries
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
+from matplotlib import rc, rcParams
+
+######################################################################
+rc('font', family='TimesRoman', weight = 'extra bold', size = 20.0)
+rc('text', usetex=True)
+rc('axes', linewidth = 2, labelsize = 'Large')  
+rc('xtick', labelsize= 'large')
+rcParams['xtick.major.size'] = 8.0 
+rcParams['xtick.minor.size'] = 4.0
+rcParams['xtick.major.pad'] = 8.0 
+rcParams['xtick.minor.pad'] = 8.0
+rc('ytick', labelsize= 'large')  
+rcParams['ytick.major.size'] = 8.0 
+rcParams['ytick.minor.size'] = 0.0
+rcParams['ytick.major.pad'] = 3.0 
+rcParams['ytick.minor.pad'] = 8.0
+rc('lines', linewidth = 2, markeredgewidth=1.5)
+rc('savefig', dpi=300)
+######################################################################
 
 #define function for potential and background equation for inflaton field \phi
 def potential(phi,potparams):
@@ -277,27 +296,34 @@ ax1.plot(Nrfin,Gr,label = "Real")
 ax1.plot(Nifin,Gi,label = "Imaginary")
 ax1.set_xlabel('N')
 ax1.set_ylabel('$\zeta_{k}$')
-ax1.legend()
+#ax1.legend()
+ax1.legend(loc="upper right",frameon=False)
 
 ax2.plot(Nrfin,np.abs(Gr),label = "Real")
 ax2.plot(Nifin,np.abs(Gi),label = "Imaginary")
 ax2.set_yscale('log')
 ax2.set_xlabel('N')
 ax2.set_ylabel('$\zeta_{k}$')
-ax2.legend()
+#ax2.legend()
 
 ax3.plot(Nrfin,dGr,label = "Real")
 ax3.plot(Nifin,dGi,label = "Imaginary")
 ax3.set_xlabel('N')
 ax3.set_ylabel('$\zeta\'_{k}$')
-ax3.legend()
+#ax3.legend()
 
 ax4.plot(Nrfin,np.abs(dGr),label = "Real")
 ax4.plot(Nifin,np.abs(dGi),label = "Imaginary")
 ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$\zeta\'_{k}$')
-ax4.legend()
+#ax4.legend()
+plt.subplots_adjust(left=0.15,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
 plt.show()
 
 #Tensor Perturbation eq in efolds
@@ -336,27 +362,34 @@ ax1.plot(Nhrfin,hr,label = "Real")
 ax1.plot(Nhifin,hi,label = "Imaginary")
 ax1.set_xlabel('N')
 ax1.set_ylabel('$h_{k}$')
-ax1.legend()
+#ax1.legend()
+ax1.legend(loc="upper right",frameon=False)
 
 ax2.plot(Nhrfin,np.abs(hr),label = "Real")
 ax2.plot(Nhifin,np.abs(hi),label = "Imaginary")
 ax2.set_yscale('log')
 ax2.set_xlabel('N')
 ax2.set_ylabel('$h_{k}$')
-ax2.legend()
+#ax2.legend()
 
 ax3.plot(Nhrfin,dhr,label = "Real")
 ax3.plot(Nhifin,dhi,label = "Imaginary")
 ax3.set_xlabel('N')
 ax3.set_ylabel('$h\'_{k}$')
-ax3.legend()
+#ax3.legend()
 
 ax4.plot(Nhrfin,np.abs(dhr),label = "Real")
 ax4.plot(Nhifin,np.abs(dhi),label = "Imaginary")
 ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$h\'_{k}$')
-ax4.legend()
+#ax4.legend()
+plt.subplots_adjust(left=0.15,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
 plt.show()
 
 #Vector Perturbation eq in efolds
@@ -396,27 +429,34 @@ ax1.plot(Nvrfin,vr,label = "Real")
 ax1.plot(Nvifin,vi,label = "Imaginary")
 ax1.set_xlabel('N')
 ax1.set_ylabel('$v_{k}$')
-ax1.legend()
+#ax1.legend()
+ax1.legend(loc="upper right",frameon=False)
 
 ax2.plot(Nvrfin,np.abs(vr),label = "Real")
 ax2.plot(Nvifin,np.abs(vi),label = "Imaginary")
 ax2.set_yscale('log')
 ax2.set_xlabel('N')
 ax2.set_ylabel('$v_{k}$')
-ax2.legend()
+#ax2.legend()
 
 ax3.plot(Nvrfin,dvr,label = "Real")
 ax3.plot(Nvifin,dvi,label = "Imaginary")
 ax3.set_xlabel('N')
 ax3.set_ylabel('$v\'_{k}$')
-ax3.legend()
+#ax3.legend()
 
 ax4.plot(Nvrfin,np.abs(dvr),label = "Real")
 ax4.plot(Nvifin,np.abs(dvi),label = "Imaginary")
 ax4.set_yscale('log')
 ax4.set_xlabel('N')
 ax4.set_ylabel('$v\'_{k}$')
-ax4.legend()
+#ax4.legend()
+plt.subplots_adjust(left=0.15,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.4)
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Vectorperturbation.pdf')
 plt.show()
 
@@ -551,7 +591,7 @@ plt.figure(figsize=(12,9))
 plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
 plt.xlabel("$k$ in $Mpc^{-1}$")
-plt.ylabel("% error")
+plt.ylabel("$\%$ error")
 plt.show()
 
 percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
@@ -560,7 +600,7 @@ plt.figure(figsize=(12,9))
 plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
 plt.xlabel("$k$ in $Mpc^{-1}$")
-plt.ylabel("% error")
+plt.ylabel("$\%$ error")
 plt.show()
 
 plt.figure(figsize=(12,9))
