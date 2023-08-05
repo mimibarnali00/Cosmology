@@ -40,8 +40,8 @@ def bgeqn(Phi,N,potparams):
 
 #parameter values
 potparams = np.zeros(3)
-potparams[0] =0.0015     #value of a
-potparams[1] =0.00014     #value of b
+potparams[0] =0.0025*1e-8     #value of a
+potparams[1] =0.00024*1e-8     #value of b
 potparams[2] =1/10    #value of c
 
 #Initial conditions
@@ -51,7 +51,7 @@ Vini,dV_ini = potential(phi0[0],potparams)
 phi0[1] = -dV_ini/Vini
 
 #Number of efolds 
-N = np.arange(0,120,5e-3)
+N = np.arange(0,116.5,5e-3)
 
 #finding $\phi$ = phi[:,0] and $d\phi/dN$ = phi[:,1] using "odeint"
 phi = odeint(bgeqn,phi0,N,args = (potparams,))
@@ -60,7 +60,7 @@ plt.figure(figsize=(12,9))
 plt.title("$\phi$ vs efolds plot")
 plt.plot(N,phi[:,0])
 plt.xlabel("N")
-plt.ylabel("$\phi$ in Mpl units")
+plt.ylabel("$\phi/M_{_{\\textrm{Pl}}}$")
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/phi2sin_phi.pdf')
 plt.show()
 
@@ -68,7 +68,7 @@ plt.figure(figsize=(12,9))
 plt.title("Derivative of $\phi$ vs efolds plot")
 plt.plot(N,phi[:,1])
 plt.xlabel("N")
-plt.ylabel("d$\phi$/dN in Mpl units")
+plt.ylabel("d$\phi$/dN/$M_{_{\\textrm{Pl}}}$")
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/phi2sin_dphi.pdf')
 plt.show()
 
@@ -76,18 +76,18 @@ plt.figure(figsize=(12,9))
 plt.title("Phase space diagram of $\phi$")
 plt.plot(phi[:,0],phi[:,1])
 #plt.xlim(-1,1)
-plt.xlabel("$\phi$ in Mpl units")
-plt.ylabel("d$\phi$/dN in Mpl units")
+plt.xlabel("$\phi/M_{_{\\textrm{Pl}}}$")
+plt.ylabel("d$\phi$/dN/$M_{_{\\textrm{Pl}}}$")
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/phi2sin_Phasespace.pdf')
 plt.show()
 
 plt.figure(figsize=(12,9))
-plt.title("V($\phi$) and dV($\phi$) vs $\phi$ plot")
+plt.title("V($\phi$) and dV($\phi$)/d$\phi$ vs $\phi$ plot")
 V,dV = potential(phi[:,0],potparams)
 plt.plot(phi[:,0],V,label = "Potential")
 plt.plot(phi[:,0],dV,label = "Derivative of Potential")
-plt.xlabel("$\phi$ in Mpl units")
-plt.ylabel("V($\phi$) and dV($\phi$)")
+plt.xlabel("$\phi/M_{_{\\textrm{Pl}}}$")
+plt.ylabel("V($\phi$)/$M_{_{\\textrm{Pl}}}^{4}$ and dV($\phi$)/d$\phi$/$M_{_{\\textrm{Pl}}}^{3}$")
 plt.legend()
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/phi2sin_V_dV.pdf')
 plt.show()
@@ -98,7 +98,7 @@ H = np.sqrt(V/(3-((phi[:,1])**2)/2))
 plt.plot(N,H)
 plt.yscale('log')
 plt.xlabel("N")
-plt.ylabel("H(N)")
+plt.ylabel("H(N)/$M_{_{\\textrm{Pl}}}$")
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/phi2sin_Hubbleparameter.pdf')
 plt.show()
 
@@ -107,6 +107,6 @@ plt.title("Horizon vs efolds")
 plt.plot(N,1/H)
 plt.yscale('log')
 plt.xlabel("N")
-plt.ylabel("1/H(N)")
+plt.ylabel("$M_{_{\\textrm{Pl}}}$/H(N)")
 plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/phi2sin_HubbleRadius.pdf')
 plt.show()

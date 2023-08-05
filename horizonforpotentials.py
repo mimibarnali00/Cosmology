@@ -63,8 +63,8 @@ potparams = 7e-6
 
 #for phi2sin potential
 #potparams = np.zeros(3)
-#potparams[0] =0.0015*1e-5     #value of a
-#potparams[1] =0.00014*1e-5      #value of b
+#potparams[0] =0.00025*1e-8      #value of a
+#potparams[1] =0.00024*1e-8       #value of b
 #potparams[2] =1/10    #value of c
 
 #for Punctuated Inflation potential

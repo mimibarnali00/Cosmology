@@ -134,7 +134,7 @@ plt.figure(figsize=(12,9))
 plt.xlim([-60,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
-plt.ylabel(r'$\frac{1}{H(a)} [1/M_{Pl}]$')
+plt.ylabel(r'$\frac{M_{_{\textrm{Pl}}}}{H(a)}$')
 plt.plot(aN,Rinfl)
 plt.plot(np.log10(a[tr1:]), RadH[tr1:])
 plt.plot(np.log10(a),lambda1, lw=2,linestyle='--',label=r'$\lambda_1$')
@@ -150,7 +150,7 @@ plt.figure(figsize=(12,9))
 plt.xlim([-60,0])
 plt.xlabel(r'$\log_{10} a$')
 plt.yscale('log')
-plt.ylabel(r'$\frac{1}{aH(a)} [1/M_{Pl}]$')
+plt.ylabel(r'$\frac{M_{_{\textrm{Pl}}}}{aH(a)}$')
 plt.plot(aN,Rinfl/(10**aN))
 plt.plot(np.log10(a[tr1:]),(RadH/a)[tr1:])
 plt.plot(np.log10(a),lambda1/a, lw=2,linestyle='--',label=r'$\lambda_1$')
@@ -393,7 +393,7 @@ plt.subplots_adjust(left=0.15,
 plt.show()
 
 #Vector Perturbation eq in efolds
-mm = 7e-4
+mm = 7e-8
 def vectorperturbeq(N,v,k):
 	a = ai*np.exp(N)
 	vk, vkN = v
@@ -457,7 +457,7 @@ plt.subplots_adjust(left=0.15,
                     top=0.9,
                     wspace=0.4,
                     hspace=0.4)
-plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Vectorperturbation.pdf')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Vectorperturbation_mm7em8.pdf')
 plt.show()
 
 #scalar power spectrum 
@@ -563,10 +563,10 @@ plt.figure(figsize=(12,9))
 plt.plot(k/kp,Pv(k,finvr,finvi),label="Vector Power spectrum")
 plt.xscale('log')
 plt.yscale('log')
-plt.xlabel("$k/kp$ in $Mpc^{-1}$")
+plt.xlabel("$k/kp/Mpc^{-1}$")
 plt.ylabel("${\cal P}_{V}(k)$")
 plt.legend()
-plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_VectorPowerspectrum.pdf')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_VectorPowerspectrum_mm7em8.pdf')
 plt.show()
 
 plt.figure(figsize=(12,9))
@@ -579,10 +579,10 @@ plt.plot(k,pvvA,'k--',label="Vector Power spectrum (Analytic)")
 plt.title("Primordial power spectra")
 plt.xscale('log')
 plt.yscale('log')
-plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.xlabel("$k/Mpc^{-1}$")
 plt.ylabel("${\cal P}_{S/T/V}(k)$")
 plt.legend()
-plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Powerspectra.pdf')
+plt.savefig('/home/barnali/Documents/GitHub/Cosmology/plots/vector_model_m2phi2_Powerspectra_mm7em8.pdf')
 plt.show()
 
 percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
@@ -590,7 +590,7 @@ percenterrscalar = (np.abs(Ps(k,finGr,finGi)-pssr)/pssr)*100
 plt.figure(figsize=(12,9))
 plt.title("Percentage error in scalar power spectra")
 plt.plot(k,percenterrscalar)
-plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.xlabel("$k/Mpc^{-1}$")
 plt.ylabel("$\%$ error")
 plt.show()
 
@@ -599,7 +599,7 @@ percenterrtensor = (np.abs(Pt(k,finhr,finhi)-ptsr)/ptsr)*100
 plt.figure(figsize=(12,9))
 plt.title("Percentage error in tensor power spectra")
 plt.plot(k,percenterrtensor)
-plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.xlabel("$k/Mpc^{-1}$")
 plt.ylabel("$\%$ error")
 plt.show()
 
@@ -608,7 +608,7 @@ plt.plot(k,Pt(k,finhr,finhi)/Ps(k,finGr,finGi))
 plt.plot(k,rsr,'g--',label="Slow roll approximation")
 plt.title("Tensor to scalar ratio")
 plt.xscale('log')
-plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.xlabel("$k/Mpc^{-1}$")
 plt.ylabel("r(k)")
 #plt.ylim([0,0.5])
 plt.show()
@@ -624,7 +624,7 @@ plt.plot(k[0:-1],ns[0:-1])
 plt.plot(k[0:-1],nssr[0:-1],'g--',label="Slow roll approximation")
 plt.title("Spectral index")
 plt.xscale('log')
-plt.xlabel("$k$ in $Mpc^{-1}$")
+plt.xlabel("$k/Mpc^{-1}$")
 plt.ylabel("$n_{s}(k)$")
 plt.ylim([0.9,1])
 plt.show()
